@@ -9,7 +9,7 @@ class MongoUserRepository(UserRepository):
         if doc:
             return User(alias=doc.alias, password_hash=doc.password_hash)
         return None
-    
+
     def save(self, user: User) -> None:
         doc = UserDocument(
             alias=user.alias,
