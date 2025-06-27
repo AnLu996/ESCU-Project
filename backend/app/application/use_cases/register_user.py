@@ -1,11 +1,17 @@
+from app.domain.repositories.user_repo import UserRepository
+from app.domain.services.password_service import PasswordService
+from app.domain.models.user import User
+
+
 class RegisterUserUseCase:
-    def __init__(self, user_repo):
+    def __init__(self, user_repo: UserRepository):
         self.user_repo = user_repo
 
-    def execute(self, alias, password):
-        if self.user_repo.exists_by_alias(alias):
-            return {"message": "Alias ya existe"}, 400
-        
-        hashed_password = hash_password(password)  # utilitario
-        self.user_repo.create_user(alias, hashed_password)
-        return {"message": "Registro exitoso"}, 201
+    def execute(self, alias: str, password: str) -> bool:
+        if self.user_repo.find_by_alias(alias):
+            return False
+
+        password_hash = PasswordService.hash_password(password)
+        user = User.create(alias, password_hash)
+        self.user_repo.save(user)
+        return True

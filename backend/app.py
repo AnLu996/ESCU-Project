@@ -1,6 +1,9 @@
-from flask import Flask
-from backend.config import init_db
-
-app = Flask(__name__)
+from config import init_db
+from app.main import create_app
 
 init_db()
+
+app = create_app()
+
+if __name__ == '__main__':
+    app.run(debug=True)

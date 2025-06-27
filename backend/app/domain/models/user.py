@@ -1,5 +1,11 @@
-from mongoengine import Document, StringField
+from dataclasses import dataclass
 
-class User(Document):
-    alias = StringField(required=True, unique=True)
-    password = StringField(required=True)
+
+@dataclass
+class User:
+    alias: str
+    password_hash: str
+
+    @staticmethod
+    def create(alias: str, password_hash: str) -> 'User':
+        return User(alias=alias, password_hash=password_hash)

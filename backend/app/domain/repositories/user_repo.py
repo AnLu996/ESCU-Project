@@ -1,6 +1,10 @@
-class UserRepository:
-    def exists_by_alias(self, alias):
-        raise NotImplementedError
+from abc import ABC, abstractmethod
+from app.domain.models.user import User
 
-    def create_user(self, alias, password):
-        raise NotImplementedError
+
+class UserRepository(ABC):
+    @abstractmethod
+    def find_by_alias(self, alias: str) -> User | None: pass
+
+    @abstractmethod
+    def save(self, user: User) -> None: pass
