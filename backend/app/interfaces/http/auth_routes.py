@@ -35,9 +35,11 @@ def login_user():
         return jsonify({'error': 'Alias y contraseña son requeridos'}), 400
 
     use_case = LoginUserUseCase(MongoUserRepository())
-    success = use_case.execute(alias, password)
+    result = use_case.execute(alias, password)
 
-    if not success:
-        return jsonify({'error': 'Credenciales incorrectas'}), 401
-
-    return jsonify({'message': 'Inicio de sesión exitoso'}), 200
+    if result == "Usuario no encontrado":
+        return jsonify({'error': result}), 401
+    elif result == "Contraseña incorrecta":
+        return jsonify({'error': result}), 401
+    else:
+        return jsonify({'message': result}), 200

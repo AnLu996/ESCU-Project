@@ -9,7 +9,9 @@ class LoginUserUseCase:
     def execute(self, alias: str, password: str) -> bool:
         user = self.user_repo.find_by_alias(alias)
         if not user:
-            return False
+            return "Usuario no encontrado"
 
         hashed_password = PasswordService.hash_password(password)
-        return user.password_hash == hashed_password
+        if user.password_hash != hashed_password:
+            return "Contraseña incorrecta"
+        return "Inicio de sesión exitoso"
