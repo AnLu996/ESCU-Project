@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom';
+import { authService } from '../../services/api';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    try {
-      const response = await API.post('/login', { email, password });
-      console.log(response.data);
-    } catch (err) {
-      console.error('Error al iniciar sesión:', err.response?.data || err.message);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const result = await authService.login({ email, password });
+    if (result.success) {
+      navigate('/');
+    } else {
+      alert('Credenciales inválidas');
     }
   };
 
@@ -19,21 +22,37 @@ function LoginPage() {
       <div className="card shadow p-4" style={{ width: '100%', maxWidth: '400px' }}>
         <h3 className="text-center mb-4">Inicia sesión</h3>
 
-        <form>
+        <form onSubmit={handleLogin}>
           <div className="mb-3">
-            <label htmlFor="username" className="form-label">Usuario</label>
-            <input type="text" className="form-control" id="username" placeholder="Nombre de usuario" />
+            <label htmlFor="email" className="form-label">Correo</label>
+            <input
+              type="email"
+              className="form-control"
+              id="email"
+              placeholder="Correo electrónico"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
 
           <div className="mb-3">
             <label htmlFor="password" className="form-label">Contraseña</label>
-            <input type="password" className="form-control" id="password" placeholder="Contraseña" />
+            <input
+              type="password"
+              className="form-control"
+              id="password"
+              placeholder="Contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
 
           <div className="d-grid">
             <button type="submit" className="btn btn-warning">Entrar</button>
           </div>
-    
+
           <p className="mt-3 text-center">
             ¿No tienes una cuenta?{' '}
             <Link to="/register" className="text-decoration-none">Regístrate</Link>
@@ -41,7 +60,7 @@ function LoginPage() {
         </form>
       </div>
     </div>
-  )
+  );
 }
 
-export default LoginPage
+export default LoginPage;

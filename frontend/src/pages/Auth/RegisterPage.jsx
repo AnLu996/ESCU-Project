@@ -1,26 +1,72 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { authService } from '../../services/api';
 
 function RegisterPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const navigate = useNavigate();
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      alert('Las contraseñas no coinciden');
+      return;
+    }
+
+    const result = await authService.register({ email, password });
+    if (result.success) {
+      alert('Registro exitoso');
+      navigate('/login');
+    } else {
+      alert('Error al registrarse');
+    }
+  };
+
   return (
     <div className="container vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: '#fff8dc' }}>
       <div className="card shadow p-4" style={{ width: '100%', maxWidth: '400px' }}>
         <h3 className="text-center mb-4">Crea tu cuenta</h3>
 
-        <form>
+        <form onSubmit={handleRegister}>
           <div className="mb-3">
-            <label htmlFor="username" className="form-label">Usuario</label>
-            <input type="text" className="form-control" id="username" placeholder="Nombre de usuario" />
+            <label htmlFor="email" className="form-label">Correo</label>
+            <input
+              type="email"
+              className="form-control"
+              id="email"
+              placeholder="Correo electrónico"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
 
           <div className="mb-3">
             <label htmlFor="password" className="form-label">Contraseña</label>
-            <input type="password" className="form-control" id="password" placeholder="Contraseña" />
+            <input
+              type="password"
+              className="form-control"
+              id="password"
+              placeholder="Contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
 
           <div className="mb-3">
             <label htmlFor="confirmPassword" className="form-label">Confirmar contraseña</label>
-            <input type="password" className="form-control" id="confirmPassword" placeholder="Confirma tu contraseña" />
+            <input
+              type="password"
+              className="form-control"
+              id="confirmPassword"
+              placeholder="Confirma tu contraseña"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
           </div>
 
           <div className="d-grid">
@@ -34,7 +80,7 @@ function RegisterPage() {
         </form>
       </div>
     </div>
-  )
+  );
 }
 
-export default RegisterPage
+export default RegisterPage;
