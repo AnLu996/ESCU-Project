@@ -1,7 +1,19 @@
-import React from 'react'
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom'
 
 function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async () => {
+    try {
+      const response = await API.post('/login', { email, password });
+      console.log(response.data);
+    } catch (err) {
+      console.error('Error al iniciar sesión:', err.response?.data || err.message);
+    }
+  };
+
   return (
     <div className="container vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: '#fff8dc' }}>
       <div className="card shadow p-4" style={{ width: '100%', maxWidth: '400px' }}>

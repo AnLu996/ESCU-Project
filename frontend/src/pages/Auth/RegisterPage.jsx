@@ -29,7 +29,7 @@ function RegisterPage() {
 
           <p className="mt-3 text-center">
             ¿Ya tienes una cuenta?{' '}
-            <Link to="/sign-in" className="text-decoration-none">Inicia sesión</Link>
+            <Link to="/login" className="text-decoration-none">Inicia sesión</Link>
           </p>
         </form>
       </div>
