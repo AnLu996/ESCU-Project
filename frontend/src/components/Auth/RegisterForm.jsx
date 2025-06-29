@@ -16,7 +16,7 @@ export default function RegisterForm() {
     if (res.success) {
       navigate("/login");
     } else {
-      alert("Error al registrarse");
+      alert(res.data?.error || res.data?.message || JSON.stringify(res.data));
     }
   };
 
