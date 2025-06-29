@@ -7,9 +7,18 @@ instance/*
 ### Flask.Python Stack ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
-backend/__pycache__/
 *.py[cod]
 *$py.class
+
+# Python cache files - Comprehensive rules for backend
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/**/*.pyo
+backend/**/*.pyd
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
 
 # C extensions
 *.so
