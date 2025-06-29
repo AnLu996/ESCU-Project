@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.application.use_cases.register_user import RegisterUserUseCase
 from app.application.use_cases.login_user import LoginUserUseCase
 from app.infrastructure.database.user_repo_impl import MongoUserRepository
+from flask_jwt_extended import create_access_token
 
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
@@ -10,7 +11,7 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 @auth_bp.route('/register', methods=['POST'])
 def register_user():
     data = request.get_json()
-    alias = data.get('alias')
+    alias = data.get('username')
     password = data.get('password')
 
     if not alias or not password:
@@ -28,7 +29,7 @@ def register_user():
 @auth_bp.route('/login', methods=['POST'])
 def login_user():
     data = request.get_json()
-    alias = data.get('alias')
+    alias = data.get('username')
     password = data.get('password')
 
     if not alias or not password:
@@ -42,4 +43,7 @@ def login_user():
     elif result == "Contraseña incorrecta":
         return jsonify({'error': result}), 401
     else:
-        return jsonify({'message': result}), 200
+        access_token = create_access_token(identity=alias)
+        return jsonify({
+            'message': result, 'token': access_token
+            }), 200
