@@ -26,147 +26,276 @@ ESCU Project es una plataforma web diseñada para facilitar la presentación de 
 - **Recursos de apoyo emocional**
 - **Encriptación de datos sensibles**
 
-## Requisitos del Sistema
+## 📋 Requisitos Previos
 
-### Software Requerido
+Antes de comenzar, asegúrate de tener instalado:
 
-- **Python 3.8** o superior
-- **Docker** y **Docker Compose**
-- **Git** (para clonar el repositorio)
+- **Node.js** (versión 18 o superior)
+- **npm** o **yarn**
+- **Python** (versión 3.8 o superior)
 - **pip** (gestor de paquetes de Python)
+- **Docker** y **Docker Compose** (opcional, para desarrollo con contenedores)
 
-### Versiones Recomendadas
-
-- Python: 3.8 - 3.12
-- Docker: 20.10 o superior
-- Docker Compose: 2.0 o superior
-
-## Instalación y Configuración
-
-### 1. Clonar el Repositorio
+### Verificar instalaciones
 
 ```bash
-git clone <url-del-repositorio>
-cd ESCU-Project
+# Verificar Node.js
+node --version
+
+# Verificar npm
+npm --version
+
+# Verificar Python
+python --version
+
+# Verificar pip
+pip --version
 ```
 
-### 2. Crear Entorno Virtual
+## 🚀 Instalación y Configuración
 
-Es recomendable crear un entorno virtual para aislar las dependencias del proyecto:
+### 1. Configuración de Variables de Entorno
 
-```bash
-python -m venv .venv
+Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+
+```env
+# MongoDB
+MONGO_ROOT_USER=tu_usuario_mongo
+MONGO_ROOT_PASS=tu_contraseña_mongo
+MONGO_DB=nombre_de_tu_base
+MONGO_URI=mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASS}@localhost:27017/${MONGO_DB}?authSource=admin
+
+# Mongo Express
+ME_USER=admin
+ME_PASS=adminpass
+
+# Flask
+SECRET_KEY=una-clave-super-secreta
+JWT_SECRET_KEY=una-clave-jwt-super-secreta
+FLASK_ENV=development
+FLASK_DEBUG=True
 ```
 
-**Activar el entorno virtual:**
+### 2. Configuración del Backend
 
-**Windows:**
+#### Crear y activar entorno virtual
+
+Es **altamente recomendado** crear un entorno virtual para aislar las dependencias del proyecto:
+
 ```bash
-.venv\Scripts\activate
+# Desde la raíz del proyecto
+# Crear entorno virtual
+python -m venv venv
+
+# Activar el entorno virtual
+# En Windows:
+venv\Scripts\activate
+
+# En macOS/Linux:
+source venv/bin/activate
 ```
 
-**Linux/macOS:**
-```bash
-source .venv/bin/activate
-```
+**Nota**: Una vez activado el entorno virtual, verás `(venv)` al inicio de tu línea de comandos.
 
-### 3. Instalar Dependencias
-
-Instalar todas las dependencias del proyecto:
+#### Instalar dependencias del backend
 
 ```bash
+# Con el entorno virtual activado (desde la raíz del proyecto)
 pip install -e .
 ```
 
-Para desarrollo (incluye herramientas de testing y linting):
-```bash
-pip install -e ".[dev]"
-```
-
-### 4. Configurar Base de Datos
-
-El proyecto utiliza MongoDB como base de datos. Iniciar los servicios con Docker:
+#### Ejecutar el backend
 
 ```bash
-docker-compose up -d
-```
-
-Esto iniciará:
-- **MongoDB** en el puerto 27017
-- **Mongo Express** (interfaz web de administración) en el puerto 8081
-
-### 5. Configurar Variables de Entorno
-
-Crear un archivo `.env` en la raíz del proyecto con la siguiente configuración:
-
-```env
-# MongoDB Configuration
-MONGODB_HOST=localhost
-MONGODB_PORT=27017
-MONGODB_DB=denuncias_db
-MONGODB_USERNAME=admin
-MONGODB_PASSWORD=password123
-MONGODB_AUTH_SOURCE=admin
-
-# Docker Configuration
-MONGO_EXPRESS_PORT=8081
-MONGO_EXPRESS_USERNAME=admin
-MONGO_EXPRESS_PASSWORD=password123
-
-# Flask Configuration
-FLASK_ENV=development
-FLASK_DEBUG=True
-SECRET_KEY=tu-clave-secreta-aqui
-JWT_SECRET_KEY=tu-jwt-secret-key-aqui
-
-# API Configuration
-API_HOST=0.0.0.0
-API_PORT=5000
-CORS_ORIGINS=*
-```
-
-**Nota importante**: 
-- El archivo `.env` ya está incluido en `.gitignore` para proteger información sensible
-- Cambia las claves secretas en producción
-- Las credenciales de MongoDB coinciden con las configuradas en `docker-compose.yml`
-- Docker Compose usará automáticamente estas variables de entorno
-
-### 6. Ejecutar la Aplicación
-
-```bash
+# Desde la raíz del proyecto (con entorno virtual activado)
 python backend/app.py
 ```
 
-La aplicación estará disponible en `http://localhost:5000`
+El backend estará disponible en: `http://localhost:5000`
 
-## Estructura del Proyecto
+**Para desactivar el entorno virtual cuando termines:**
+```bash
+deactivate
+```
+
+### 3. Configuración del Frontend
+
+#### Instalar dependencias del frontend
+
+```bash
+# Navegar al directorio frontend
+cd frontend
+
+# Instalar dependencias de Node.js
+npm install
+```
+
+#### Ejecutar el frontend en modo desarrollo
+
+```bash
+# Desde el directorio frontend
+npm run dev
+```
+
+El frontend estará disponible en: `http://localhost:5173`
+
+#### Construir el frontend para producción
+
+```bash
+# Desde el directorio frontend
+npm run build
+```
+
+## 🔄 Ejecución Completa del Proyecto
+
+### Opción 1: Desarrollo Local (Recomendado para desarrollo)
+
+1. **Crear y activar entorno virtual:**
+   ```bash
+   # Desde la raíz del proyecto
+   python -m venv venv
+   
+   # Activar entorno virtual
+   # Windows:
+   venv\Scripts\activate
+   # macOS/Linux:
+   source venv/bin/activate
+   
+   # Instalar dependencias
+   pip install -e .
+   ```
+
+2. **Iniciar MongoDB con Docker:**
+   ```bash
+   # Desde la raíz del proyecto
+   docker-compose up -d
+   ```
+
+3. **Ejecutar el backend:**
+   ```bash
+   # Terminal 1 - Desde la raíz del proyecto (con entorno virtual activado)
+   python backend/app.py
+   ```
+
+4. **Ejecutar el frontend:**
+   ```bash
+   # Terminal 2 - Desde el directorio frontend
+   cd frontend
+   npm run dev
+   ```
+
+### Opción 2: Todo con Docker (Recomendado para producción)
+
+```bash
+# Desde la raíz del proyecto
+docker-compose up -d
+```
+
+## 🌐 Acceso a los Servicios
+
+Una vez ejecutado el proyecto:
+
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:5000
+- **MongoDB**: localhost:27017
+- **Mongo Express**: http://localhost:8081
+
+## 📁 Estructura del Proyecto
 
 ```
 ESCU-Project/
-├── backend/                 # Backend Flask
+├── backend/               # Backend (Flask)
 │   ├── app/
-│   │   ├── application/     # Casos de uso (lógica de negocio)
-│   │   │   ├── login_user.py
-│   │   │   └── register_user.py
-│   │   ├── domain/         # Modelos y reglas de negocio
-│   │   │   ├── models/     # Entidades del dominio
-│   │   │   ├── repositories/ # Interfaces de repositorios
-│   │   │   └── services/   # Servicios del dominio
-│   │   ├── infrastructure/ # Implementaciones externas
-│   │   │   ├── database/   # Implementación de base de datos
-│   │   │   └── external_apis/ # APIs externas
+│   │   ├── application/   # Casos de uso
+│   │   ├── config/        # Configuración
+│   │   ├── domain/        # Modelos y lógica de negocio
+│   │   ├── infrastructure/ # Implementaciones
 │   │   └── interfaces/     # Controladores y rutas HTTP
 │   │       └── http/       # Rutas de la API
-│   ├── config.py           # Configuración de base de datos
 │   └── app.py             # Punto de entrada de la aplicación
 ├── frontend/               # Frontend (React)
-│   └── src/
-├── tests/                  # Tests de integración
-├── mongo-init/             # Scripts de inicialización de MongoDB
+│   ├── src/
+│   │   ├── components/     # Componentes React
+│   │   ├── pages/          # Páginas de la aplicación
+│   │   ├── services/       # Servicios de API
+│   │   └── routes/         # Configuración de rutas
+│   └── package.json        # Dependencias del frontend
 ├── docker-compose.yml      # Configuración de Docker
-├── pyproject.toml         # Configuración del proyecto Python
-└── README.md              # Este archivo
+└── .env                    # Variables de entorno
 ```
+
+## 🔧 Scripts Útiles
+
+### Frontend
+```bash
+cd frontend
+
+# Desarrollo
+npm run dev
+
+# Construcción para producción
+npm run build
+
+# Vista previa de la construcción
+npm run preview
+
+# Linting
+npm run lint
+```
+
+### Backend
+```bash
+# Desde la raíz del proyecto (con entorno virtual activado)
+
+# Ejecutar en modo desarrollo
+python backend/app.py
+
+# Ejecutar tests
+pytest
+```
+
+## 🔒 Configuración de Seguridad
+
+⚠️ **Importante**: 
+- Nunca subas el archivo `.env` al repositorio
+- Usa claves secretas fuertes en producción
+- Cambia las contraseñas por defecto en producción
+- Configura CORS apropiadamente para producción
+
+## 🐛 Solución de Problemas
+
+### Error de conexión entre frontend y backend
+- Verifica que el backend esté ejecutándose en el puerto 5000
+- Confirma que las URLs en `frontend/src/services/api.js` sean correctas
+- Revisa la configuración de CORS en el backend
+
+### Error de conexión a MongoDB
+- Verifica que MongoDB esté ejecutándose
+- Confirma las credenciales en el archivo `.env`
+- Revisa que el puerto 27017 esté disponible
+
+### Error de dependencias del frontend
+```bash
+cd frontend
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Error de dependencias del backend
+```bash
+cd backend
+pip install -r requirements.txt
+# o
+pip install -e ..
+```
+
+## 📝 Notas de Desarrollo
+
+- El frontend usa **Vite** como bundler para desarrollo rápido
+- El backend usa **Flask** con arquitectura hexagonal
+- La comunicación entre frontend y backend es a través de **REST API**
+- **MongoDB** se usa como base de datos principal
+- **Mongo Express** proporciona una interfaz web para administrar MongoDB
 
 ## API Endpoints
 
