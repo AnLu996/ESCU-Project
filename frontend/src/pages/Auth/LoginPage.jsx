@@ -9,11 +9,11 @@ function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const result = await authService.login({ email, password });
+    const result = await authService.login({ username: email, password });
     if (result.success) {
       navigate('/');
     } else {
-      alert('Credenciales inválidas');
+      alert(result.data?.error || result.data?.message || JSON.stringify(result.data));
     }
   };
 
