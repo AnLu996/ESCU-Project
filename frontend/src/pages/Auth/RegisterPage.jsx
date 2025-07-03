@@ -15,12 +15,12 @@ function RegisterPage() {
       return;
     }
 
-    const result = await authService.register({ email, password });
+    const result = await authService.register({ username: email, password });
     if (result.success) {
       alert('Registro exitoso');
       navigate('/login');
     } else {
-      alert('Error al registrarse');
+      alert(result.data?.error || result.data?.message || JSON.stringify(result.data));
     }
   };
 

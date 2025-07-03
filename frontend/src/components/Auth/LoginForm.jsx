@@ -16,7 +16,7 @@ export default function LoginForm() {
     if (res.success) {
       navigate("/home");
     } else {
-      alert("Credenciales inválidas");
+      alert(res.data?.error || res.data?.message || JSON.stringify(res.data));
     }
   };
 
