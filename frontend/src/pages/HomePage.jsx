@@ -8,25 +8,29 @@ function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100">
-      <header className="flex justify-between items-center px-6 py-4 bg-white shadow">
-        <h1 className="text-3xl font-bold text-blue-600">🌟 Muro Anónimo</h1>
+    <div className="min-h-screen bg-blue-900 flex flex-col">
+      {/* Header */}
+      <header className="flex justify-between items-center px-6 py-4 bg-blue-800 shadow text-white">
+        <h1 className="text-3xl font-bold">🌟 Muro Anónimo</h1>
         <Link to="/login">
-          <button className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+          <button className="bg-white text-blue-800 px-5 py-2 rounded-lg hover:bg-gray-100 transition duration-300">
             Iniciar sesión
           </button>
         </Link>
       </header>
 
-      <main className="max-w-2xl mx-auto mt-10 space-y-6 px-4">
-        {posts.map((post) => (
-          <div
-            key={post.id}
-            className="bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition"
-          >
-            <p className="text-gray-700 text-lg">{post.content}</p>
-          </div>
-        ))}
+      {/* Main content centrado */}
+      <main className="flex-1 flex items-center justify-center px-4">
+        <div className="w-full max-w-2xl space-y-6">
+          {posts.map((post) => (
+            <div
+              key={post.id}
+              className="bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition"
+            >
+              <p className="text-gray-700 text-lg">{post.content}</p>
+            </div>
+          ))}
+        </div>
       </main>
     </div>
   )
