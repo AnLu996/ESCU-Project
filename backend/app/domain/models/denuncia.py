@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 class Denuncia:
     def __init__(self, usuario, categoria, descripcion, lugar, fecha_hecho=None, involucrados=None, evidencia=None):
@@ -9,4 +9,4 @@ class Denuncia:
         self.fecha_hecho = fecha_hecho or datetime.timezone.utc()
         self.involucrados = involucrados
         self.evidencia = evidencia 
-        self.fecha_creacion = datetime.timezone.utc()
+        self.fecha_creacion = datetime.now(timezone.utc)
