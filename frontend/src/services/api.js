@@ -1,13 +1,11 @@
-// frontend/src/services/api.js
 import axios from 'axios';
 
 const API = axios.create({
   baseURL: 'http://localhost:5000/api',
-  withCredentials: true,
+  withCredentials: true, // Si usas cookies de sesión
 });
 
-export default API;
-
+// Autenticación
 export const authService = {
   login: async (credentials) => {
     const res = await fetch("http://localhost:5000/api/auth/login", {
@@ -24,15 +22,15 @@ export const authService = {
 
   register: async (credentials) => {
     try {
-    const res = await fetch("http://localhost:5000/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(credentials),
-    });
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials),
+      });
 
-    const data = await res.json().catch(() => ({}));
-    
-    return {
+      const data = await res.json().catch(() => ({}));
+
+      return {
         success: res.ok,
         data: res.ok ? data : (data.error || "Error desconocido"),
       };
@@ -52,3 +50,36 @@ export const authService = {
     return localStorage.getItem("token");
   },
 };
+
+// Denuncias
+export const denunciaService = {
+  crearDenuncia: async (formData) => {
+    try {
+      const res = await API.post('/denuncias', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return { success: true, data: res.data };
+    } catch (err) {
+      return {
+        success: false,
+        data: err.response?.data || 'Error al enviar la denuncia',
+      };
+    }
+  },
+
+  obtenerDenuncias: async () => {
+    try {
+      const res = await API.get('/denuncias');
+      return { success: true, data: res.data };
+    } catch (err) {
+      return {
+        success: false,
+        data: err.response?.data || 'Error al obtener denuncias',
+      };
+    }
+  }
+};
+
+export default API;
