@@ -1,7 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
+import { denunciaService } from '../services/api';
 
 function ReportPage() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     categoria: '',
     descripcion: '',
@@ -34,14 +38,10 @@ function ReportPage() {
       datos.append('pruebas', archivoPrueba);
     }
 
-    try {
-      // Aquí va tu lógica para enviar los datos al backend:
-      // await fetch('/api/denuncias', { method: 'POST', body: datos });
+    const result = await denunciaService.crearDenuncia(datos);
 
-      console.log('Formulario enviado con archivo:', archivoPrueba);
+    if (result.success) {
       alert('Denuncia registrada exitosamente');
-
-      // Limpiar
       setFormData({
         categoria: '',
         descripcion: '',
@@ -50,18 +50,25 @@ function ReportPage() {
         involucrados: '',
       });
       setArchivoPrueba(null);
-      e.target.reset(); // Resetea el formulario también
-    } catch (error) {
-      console.error('Error al enviar la denuncia:', error);
-      alert('Error al registrar la denuncia');
+      e.target.reset();
+    } else {
+      console.error('Error al enviar la denuncia:', result.data);
+      alert('Error al registrar la denuncia: ' + result.data);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f9fb]">
+    <div className="min-h-screen bg-[#f7f9fb] relative">
       <Header />
 
       <main className="max-w-xl mx-auto mt-10 px-6">
+        <button
+          onClick={() => navigate('/')}
+          className="absolute mb-6 left-20 bg-gray-200 text-blue-700 font-medium px-4 py-2 rounded hover:bg-gray-300 transition z-10"
+        >
+          ← Regresar al inicio
+        </button>
+
         <h2 className="text-2xl font-bold text-center text-blue-700 mb-6">
           Formulario de Denuncia
         </h2>
@@ -142,7 +149,9 @@ function ReportPage() {
               accept="image/*,.pdf,.doc,.docx"
             />
             {archivoPrueba && (
-              <p className="text-sm text-gray-600 mt-1">Archivo seleccionado: {archivoPrueba.name}</p>
+              <p className="text-sm text-gray-600 mt-1">
+                Archivo seleccionado: {archivoPrueba.name}
+              </p>
             )}
           </div>
 
