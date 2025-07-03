@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import authService from '../services/api'; // Asegúrate de tener este archivo implementado
+import { authService } from '../services/api';
 
 function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
   const [modoRegistro, setModoRegistro] = useState(false);
@@ -8,49 +8,51 @@ function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
   const [contrasena, setContrasena] = useState('');
   const [confirmarContrasena, setConfirmarContrasena] = useState('');
   const [error, setError] = useState('');
-  const [alerta, setAlerta] = useState('');
-  const [usuarioExiste, setUsuarioExiste] = useState(false);
+  const [mensaje, setMensaje] = useState('');
+  const [tipoMensaje, setTipoMensaje] = useState('');
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const validarUsuario = async () => {
-      if (modoRegistro && usuario.trim().length > 3) {
-        const existe = await authService.verificarUsuario(usuario);
-        setUsuarioExiste(existe);
-      }
-    };
-    validarUsuario();
-  }, [usuario, modoRegistro]);
+  const mostrarMensaje = (data, tipo = 'success') => {
+    const texto = typeof data === 'string' ? data : data?.error || JSON.stringify(data);
+    setMensaje(texto);
+    setTipoMensaje(tipo);
+    setTimeout(() => setMensaje(''), 3000);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setMensaje('');
 
     if (modoRegistro) {
-      if (usuarioExiste) return setError('Este usuario ya existe.');
       if (contrasena !== confirmarContrasena) return setError('Las contraseñas no coinciden.');
       if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(contrasena)) {
         return setError('Contraseña insegura. Usa mayúsculas, minúsculas y números.');
       }
 
-      const result = await authService.register({ usuario, password: contrasena });
+      const result = await authService.register({ username: usuario, password: contrasena });
       if (result.success) {
-        alert('¡Bienvenido a ESCÚ!');
         setIsLoggedIn(true);
-        setMostrarModal(false);
-        navigate('/');
+        mostrarMensaje('Registro exitoso', 'success');
+        setTimeout(() => {
+          setMostrarModal(false);
+          navigate('/');
+        }, 1000);
       } else {
-        setError('Error al registrarse');
+        mostrarMensaje(result.data, 'error');
       }
     } else {
-      const result = await authService.login({ usuario, password: contrasena });
+      const result = await authService.login({ username: usuario, password: contrasena });
       if (result.success) {
         setIsLoggedIn(true);
-        setMostrarModal(false);
-        setAlerta('¡Inicio de sesión exitoso!');
-        setTimeout(() => setAlerta(''), 3000);
+        mostrarMensaje('Inicio de sesión exitoso', 'success');
+        setTimeout(() => {
+          setMostrarModal(false);
+          navigate('/');
+        }, 1000);
       } else {
-        setError('Credenciales inválidas');
+        mostrarMensaje(result.data, 'error');
       }
     }
   };
@@ -81,7 +83,6 @@ function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
                   placeholder="Tu nombre de usuario"
                   className="w-full p-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
                 />
-                {usuarioExiste && <p className="text-sm text-red-600 mt-1">Este usuario ya está registrado</p>}
               </div>
               <div>
                 <label className="block text-sm font-semibold text-blue-800">Contraseña</label>
@@ -105,7 +106,7 @@ function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
                   />
                 </div>
               )}
-              {error && <p className="text-red-600 text-sm">{error}</p>}
+              {error && <p className="text-red-600 text-sm text-center font-medium">{error}</p>}
               <button
                 type="submit"
                 className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
@@ -134,10 +135,12 @@ function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
           </div>
         </div>
 
-        {/* Alerta de login exitoso */}
-        {alerta && (
-          <div className="fixed bottom-4 left-4 bg-green-600 text-white px-4 py-2 rounded shadow-md z-50 animate-fade-in-down">
-            {alerta}
+        {/* Alerta visual */}
+        {mensaje && (
+          <div className={`fixed bottom-4 left-4 px-4 py-2 rounded shadow-md z-50 ${
+            tipoMensaje === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+          }`}>
+            {mensaje}
           </div>
         )}
       </div>
