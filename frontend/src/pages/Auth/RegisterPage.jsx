@@ -25,59 +25,70 @@ function RegisterPage() {
   };
 
   return (
-    <div className="container vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: '#fff8dc' }}>
-      <div className="card shadow p-4" style={{ width: '100%', maxWidth: '400px' }}>
-        <h3 className="text-center mb-4">Crea tu cuenta</h3>
+    <div className="min-h-screen bg-blue-900 flex items-center justify-center px-4">
+      <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-md">
+        <h2 className="text-2xl font-semibold text-center text-blue-800 mb-6">Crea tu cuenta</h2>
 
-        <form onSubmit={handleRegister}>
-          <div className="mb-3">
-            <label htmlFor="email" className="form-label">Correo</label>
+        <form onSubmit={handleRegister} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Correo electrónico
+            </label>
             <input
               type="email"
-              className="form-control"
               id="email"
-              placeholder="Correo electrónico"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+              placeholder="correo@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
 
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label">Contraseña</label>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              Contraseña
+            </label>
             <input
               type="password"
-              className="form-control"
               id="password"
-              placeholder="Contraseña"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
 
-          <div className="mb-3">
-            <label htmlFor="confirmPassword" className="form-label">Confirmar contraseña</label>
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              Confirmar contraseña
+            </label>
             <input
               type="password"
-              className="form-control"
               id="confirmPassword"
-              placeholder="Confirma tu contraseña"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+              placeholder="••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
           </div>
 
-          <div className="d-grid">
-            <button type="submit" className="btn btn-warning">Registrarse</button>
-          </div>
-
-          <p className="mt-3 text-center">
-            ¿Ya tienes una cuenta?{' '}
-            <Link to="/login" className="text-decoration-none">Inicia sesión</Link>
-          </p>
+          <button
+            type="submit"
+            className="w-full bg-blue-800 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+          >
+            Registrarse
+          </button>
         </form>
+
+        <p className="mt-4 text-center text-sm text-gray-600">
+          ¿Ya tienes una cuenta?{' '}
+          <Link to="/login" className="text-blue-600 hover:underline">
+            Inicia sesión
+          </Link>
+        </p>
       </div>
     </div>
   );
