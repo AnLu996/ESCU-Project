@@ -2,6 +2,7 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from app.interfaces.http.auth_routes import auth_bp
+from app.interfaces.http.muro_routes import muro_bp
 from app.config.settings import settings
 
 jwt = JWTManager()
@@ -21,5 +22,6 @@ def create_app():
 
     # Blueprints
     app.register_blueprint(auth_bp)
+    app.register_blueprint(muro_bp)
 
     return app
