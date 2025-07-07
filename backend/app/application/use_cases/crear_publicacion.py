@@ -8,18 +8,13 @@ class CrearPublicacionUseCase:
         self.repositorio = repositorio
 
     def execute(
-        self, contenido: str, usuario, anonimo: bool = True
+        self, contenido: str, usuario, anonimo: bool = False
     ) -> Publicacion:
         nueva_publicacion = Publicacion(
             contenido=contenido,
             usuario=usuario,
             anonimo=anonimo,
             fecha_creacion=datetime.now(),
-            fecha_actualizacion=datetime.now(),
-            reacciones={
-                "me_gusta": 0,
-                "abrazo": 0,
-                "fuerza": 0
-            }
+            fecha_actualizacion=datetime.now()
         )
         return self.repositorio.crear(nueva_publicacion)
