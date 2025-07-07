@@ -8,7 +8,6 @@ class Publicacion:
     contenido: str
     fecha_creacion: datetime
     fecha_actualizacion: datetime
-    reacciones: dict
     usuario: str
     anonimo: bool
     id: Optional[str] = field(default=None)
