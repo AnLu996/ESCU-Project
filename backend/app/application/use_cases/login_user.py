@@ -6,7 +6,7 @@ class LoginUserUseCase:
     def __init__(self, user_repo: UserRepository):
         self.user_repo = user_repo
 
-    def execute(self, alias: str, password: str) -> bool:
+    def execute(self, alias: str, password: str) -> str:
         user = self.user_repo.find_by_alias(alias)
         if not user:
             return "Usuario no encontrado"
