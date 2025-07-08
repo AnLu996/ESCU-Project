@@ -1,5 +1,8 @@
-from mongoengine import ReferenceField, Document, StringField, DateTimeField, ListField
+from mongoengine import (
+    ReferenceField, Document, StringField, DateTimeField, ListField
+)
 from app.infrastructure.database.user_document import UserDocument
+
 
 class DenunciaDocument(Document):
     usuario = ReferenceField(UserDocument, required=True)

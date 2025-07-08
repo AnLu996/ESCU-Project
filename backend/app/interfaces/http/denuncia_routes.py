@@ -1,11 +1,14 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.application.use_cases.create_denuncia import CreateDenunciaUseCase
-from app.infrastructure.database.denuncia_repo_impl import MongoDenunciaRepository
+from app.infrastructure.database.denuncia_repo_impl import (
+    MongoDenunciaRepository
+)
 from app.infrastructure.database.user_document import UserDocument
 from datetime import datetime
 
 denuncia_bp = Blueprint('denuncias', __name__, url_prefix='/api/denuncias')
+
 
 @denuncia_bp.route('/', methods=['POST'])
 @jwt_required()
@@ -27,7 +30,8 @@ def create_denuncia():
     try:
         fecha_hecho = datetime.fromisoformat(data['fecha_hecho'])
     except ValueError:
-        return jsonify({"error": "Formato de fecha_hecho inválido. Usa ISO 8601."}), 400
+        return jsonify({"error":
+                        "Formato de fecha_hecho inválido. Usa ISO 8601."}), 400
 
     # Ejecutar caso de uso
     use_case = CreateDenunciaUseCase(MongoDenunciaRepository())
@@ -44,7 +48,8 @@ def create_denuncia():
     if not success:
         return jsonify({'error': result}), 400
 
-    return jsonify({'message': "Denuncia creada exitosamente", "denuncia_id": result}), 201
+    return jsonify({'message': "Denuncia creada exitosamente",
+                    "denuncia_id": result}), 201
 
 
 @denuncia_bp.route('/mis-denuncias', methods=['GET'])
