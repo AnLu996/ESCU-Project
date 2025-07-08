@@ -29,7 +29,7 @@ class MongoDenunciaRepository(DenunciaRepository):
         return [self._to_dict(doc) for doc in docs]
 
     """
-    método privado: convierte un documento de Mongo 
+    método privado: convierte un documento de Mongo
     en un objeto Denuncia de el dominio.
     """
     def _to_domain(self, doc: DenunciaDocument) -> Denuncia:
