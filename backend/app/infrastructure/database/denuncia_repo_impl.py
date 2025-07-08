@@ -2,6 +2,7 @@ from app.domain.repositories.denuncia_repo import DenunciaRepository
 from app.domain.models.denuncia import Denuncia
 from app.infrastructure.database.denuncia_document import DenunciaDocument
 
+
 class MongoDenunciaRepository(DenunciaRepository):
     def save(self, denuncia: Denuncia) -> str:
         doc = DenunciaDocument(
@@ -23,7 +24,8 @@ class MongoDenunciaRepository(DenunciaRepository):
         return self._to_domain(doc)
 
     def find_by_user(self, user) -> list[Denuncia]:
-        docs = DenunciaDocument.objects(usuario=user).order_by('-fecha_creacion')
+        docs = DenunciaDocument.objects(
+            usuario=user).order_by('-fecha_creacion')
         return [self._to_dict(doc) for doc in docs]
 
     """
@@ -40,7 +42,7 @@ class MongoDenunciaRepository(DenunciaRepository):
             evidencia=doc.evidencia,
             usuario=doc.usuario
         )
-    
+
     """
     método auxiliar para convertir un documento/denuncia a diccionario
     """
@@ -50,9 +52,10 @@ class MongoDenunciaRepository(DenunciaRepository):
             "categoria": doc.categoria,
             "descripcion": doc.descripcion,
             "lugar": doc.lugar,
-            "fecha_hecho": doc.fecha_hecho.isoformat() if doc.fecha_hecho else None,
+            "fecha_hecho":
+                doc.fecha_hecho.isoformat() if doc.fecha_hecho else None,
             "involucrados": doc.involucrados,
             "evidencia": doc.evidencia,
-            "fecha_creacion": doc.fecha_creacion.isoformat() if doc.fecha_creacion else None,
+            "fecha_creacion":
+                doc.fecha_creacion.isoformat() if doc.fecha_creacion else None,
         }
-
