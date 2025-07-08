@@ -10,7 +10,7 @@ class CreateDenunciaUseCase:
             self,
             categoria,
             descripcion,
-            lugar, 
+            lugar,
             fecha_hecho,
             involucrados,
             evidencia,
