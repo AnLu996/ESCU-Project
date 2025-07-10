@@ -6,6 +6,7 @@ from app.infrastructure.database.denuncia_repo_impl import (
 )
 from app.infrastructure.database.user_document import UserDocument
 from datetime import datetime
+from app.shared.utils import guardar_evidencia
 
 denuncia_bp = Blueprint('denuncias', __name__, url_prefix='/api/denuncias')
 
@@ -13,7 +14,8 @@ denuncia_bp = Blueprint('denuncias', __name__, url_prefix='/api/denuncias')
 @denuncia_bp.route('/', methods=['POST'])
 @jwt_required()
 def create_denuncia():
-    data = request.get_json()
+    data = request.form
+    files = request.files.getlist('evidencia')
     required_fields = ['categoria', 'descripcion', 'lugar', 'fecha_hecho']
 
     # Validar campos requeridos
@@ -33,6 +35,15 @@ def create_denuncia():
         return jsonify({"error":
                         "Formato de fecha_hecho inválido. Usa ISO 8601."}), 400
 
+    evidencias_guardadas = []
+    for file in files:
+        nombre_archivo, error = guardar_evidencia(file)
+        if error:
+            return jsonify(
+                {"error": f"No se pudo guardar evidencia: {error}"}
+                ), 400
+        evidencias_guardadas.append(nombre_archivo)
+
     # Ejecutar caso de uso
     use_case = CreateDenunciaUseCase(MongoDenunciaRepository())
     result, success = use_case.execute(
@@ -40,8 +51,8 @@ def create_denuncia():
         descripcion=data['descripcion'],
         lugar=data['lugar'],
         fecha_hecho=fecha_hecho,
-        involucrados=data.get('involucrados', []),
-        evidencia=data.get('evidencia', []),
+        involucrados=data.getlist('involucrados') or [],
+        evidencia=evidencias_guardadas,
         usuario=user
     )
 
