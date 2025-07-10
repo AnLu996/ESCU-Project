@@ -1,6 +1,6 @@
 import pytest
-from backend.app.application.use_cases.login_user import LoginUserUseCase
-from backend.app.domain.exceptions.user_exceptions import InvalidUsernameError, InvalidPasswordError
+from app.application.use_cases.login_user import LoginUserUseCase
+from app.domain.exceptions.user_exceptions import InvalidUsernameError, InvalidPasswordError
 
 # Usuario falso para pruebas
 class FakeUser:
