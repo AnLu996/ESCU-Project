@@ -15,8 +15,8 @@ denuncia_bp = Blueprint('denuncias', __name__, url_prefix='/api/denuncias')
 @jwt_required()
 def create_denuncia():
     data = request.form
-    files = request.files.getlist('evidencia')
-    required_fields = ['categoria', 'descripcion', 'lugar', 'fecha_hecho']
+    files = request.files.getlist('pruebas')
+    required_fields = ['categoria', 'descripcion', 'lugar', 'fechaHora']
 
     # Validar campos requeridos
     if not all(field in data for field in required_fields):
@@ -30,7 +30,7 @@ def create_denuncia():
 
     # Convertir fecha_hecho
     try:
-        fecha_hecho = datetime.fromisoformat(data['fecha_hecho'])
+        fecha_hecho = datetime.fromisoformat(data['fechaHora'])
     except ValueError:
         return jsonify({"error":
                         "Formato de fecha_hecho inválido. Usa ISO 8601."}), 400
