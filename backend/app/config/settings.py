@@ -19,5 +19,10 @@ class Settings:
     # MongoDB
     MONGO_URI = os.getenv("MONGO_URI")
 
+    # Archivos / Evidencias
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    UPLOADS_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads', 'denuncias')
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'mp4', 'avi'}
+
 
 settings = Settings()
