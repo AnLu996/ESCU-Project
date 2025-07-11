@@ -1,23 +1,23 @@
-# TODO: Implement shared utility functions
-# - Validation helpers
-# - Date/time utilities
-# - String manipulation
-# - Common business logic
+import os
+from werkzeug.utils import secure_filename
+from app.config.settings import settings
+from uuid import uuid4
 
 
-def validate_email(email: str) -> bool:
-    """Validate email format"""
-    # TODO: Implement email validation
-    pass
+def guardar_evidencia(file):
+    if not file:
+        return None, "Archivo vacio"
 
+    filename = secure_filename(file.filename)
+    ext = filename.rsplit('.', 1)[-1].lower()
 
-def sanitize_string(text: str) -> str:
-    """Sanitize input string"""
-    # TODO: Implement string sanitization
-    pass
+    if ext not in settings.ALLOWED_EXTENSIONS:
+        return None, f"Extension '{ext}' no permitida"
 
+    os.makedirs(settings.UPLOADS_FOLDER, exist_ok=True)
 
-def generate_random_string(length: int = 8) -> str:
-    """Generate random string"""
-    # TODO: Implement random string generation
-    pass 
+    unique_name = f"{uuid4().hex}.{ext}"
+    file_path = os.path.join(settings.UPLOADS_FOLDER, unique_name)
+    file.save(file_path)
+
+    return unique_name, None
