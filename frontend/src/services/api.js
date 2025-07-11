@@ -1,9 +1,19 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api',
-  withCredentials: true, // Si usas cookies de sesión
+  baseURL: 'http://localhost:5000/api'
 });
+
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Autenticación
 export const authService = {
@@ -55,11 +65,7 @@ export const authService = {
 export const denunciaService = {
   crearDenuncia: async (formData) => {
     try {
-      const res = await API.post('/denuncias', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const res = await API.post('/denuncias/', formData);
       return { success: true, data: res.data };
     } catch (err) {
       return {
@@ -71,7 +77,7 @@ export const denunciaService = {
 
   obtenerDenuncias: async () => {
     try {
-      const res = await API.get('/denuncias');
+      const res = await API.get('/mis-denuncias');
       return { success: true, data: res.data };
     } catch (err) {
       return {
