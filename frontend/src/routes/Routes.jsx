@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import HomePage from '../pages/HomePage';
 import DenunciaPage from "../pages/DenunciaPage";
-import AdminDashboard from "../pages/admin";
+import AdminDashboard from "../pages/AdminPage";
 
 export default function AuthRoutes() {
   return (
