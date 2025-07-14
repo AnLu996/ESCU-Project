@@ -4,6 +4,10 @@ node_modules/
 # === Build output ===
 dist/
 
+# === Cache files ===
+__pycache__/
+*.py[cod]
+
 # === Logs ===
 *.log
 logs/
