@@ -4,6 +4,7 @@ from app.application.use_cases.create_denuncia import CreateDenunciaUseCase
 from app.infrastructure.database.denuncia_repo_impl import (
     MongoDenunciaRepository
 )
+from app.application.use_cases.obtener_denuncias import ObtenerDenunciasUseCase
 from app.infrastructure.database.user_document import UserDocument
 from datetime import datetime
 from app.shared.utils import guardar_evidencia
@@ -74,3 +75,16 @@ def mis_denuncias():
     repo = MongoDenunciaRepository()
     denuncias = repo.find_by_user(user)
     return jsonify(denuncias), 200
+
+
+@denuncia_bp.route('/', methods=['GET'])
+@jwt_required()
+def obtener_denuncias():
+    usuario = get_jwt_identity()
+    user = UserDocument.objects(alias=usuario).first()
+    if not user:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+    use_case = ObtenerDenunciasUseCase(MongoDenunciaRepository())
+    publicaciones = use_case.execute()
+
+    return jsonify(publicaciones), 200
