@@ -6,6 +6,10 @@ dist/
 backend/app/static/
 
 
+# === Cache files ===
+__pycache__/
+*.py[cod]
+
 # === Logs ===
 *.log
 logs/

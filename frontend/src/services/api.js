@@ -88,4 +88,30 @@ export const denunciaService = {
   }
 };
 
+
+export const adminService = {
+  async getDenuncias() {
+    // Simula una API temporalmente
+    return [
+      {
+        categoria: 'Acoso',
+        descripcion: 'Un incidente en el pasillo B',
+        fechaHora: '2025-07-01T14:00',
+      },
+      {
+        categoria: 'Robo',
+        descripcion: 'Se reportó robo de laptop en la biblioteca',
+        fechaHora: '2025-07-02T09:30',
+      },
+    ];
+  },
+
+  async getPosts() {
+    return [
+      { content: 'Hoy me siento triste 😞' },
+      { content: 'Recuerda que eres fuerte 💪' },
+    ];
+  },
+};
+
 export default API;
