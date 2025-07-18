@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import AuthModal from '../components/AuthModal';
+import MiniChatBot from '../components/MiniChatBot';
 
 function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -116,6 +117,7 @@ function formatearFecha(fechaISO) {
         setMostrarModal={setMostrarModal}
         setIsLoggedIn={setIsLoggedIn}
       />
+      <MiniChatBot isLoggedIn={isLoggedIn} />
     </div>
   );
 }
