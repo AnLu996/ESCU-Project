@@ -4,10 +4,10 @@ from flask_cors import CORS
 from app.interfaces.http.auth_routes import auth_bp
 from app.interfaces.http.muro_routes import muro_bp
 from app.interfaces.http.denuncia_routes import denuncia_bp
+from app.interfaces.http.chatbot_routes import chatbot_bp
 from app.config.settings import settings
 
 jwt = JWTManager()
-
 
 def create_app():
     app = Flask(__name__)
@@ -25,5 +25,6 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(muro_bp)
     app.register_blueprint(denuncia_bp)
+    app.register_blueprint(chatbot_bp)
 
     return app
