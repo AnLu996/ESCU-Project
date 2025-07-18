@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import HomePage from '../pages/HomePage';
 import DenunciaPage from "../pages/DenunciaPage";
 import AdminDashboard from "../pages/AdminPage";
+import UserProfile from "../pages/ProfilePage";
 
 export default function AuthRoutes() {
   return (
@@ -9,6 +10,7 @@ export default function AuthRoutes() {
       <Route path="/" element={<HomePage />} />
       <Route path="/denuncia" element={<DenunciaPage />} />
       <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/user-profile" element={<UserProfile />} />
     </Routes>
   );
 } 

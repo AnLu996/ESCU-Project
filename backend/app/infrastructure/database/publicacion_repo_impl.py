@@ -2,7 +2,6 @@ from app.domain.models.publicacion import Publicacion
 from app.infrastructure.database.publicacion_document import (
     Publicacion as PublicacionDocument
 )
-from app.infrastructure.database.user_document import UserDocument
 from app.domain.repositories.publicacion_repo import PublicacionRepository
 from mongoengine.errors import DoesNotExist
 from datetime import datetime
@@ -71,30 +70,3 @@ class MongoPublicacionRepository(PublicacionRepository):
             return True
         except DoesNotExist:
             return False
-
-    def obtener_por_usuario(self, alias: str) -> list[Publicacion]:
-        try:
-            usuario_doc = UserDocument.objects.get(alias=alias)
-            publicaciones_docs = PublicacionDocument.objects(
-                usuario=usuario_doc
-                ).order_by("-fecha_creacion")
-
-            publicaciones = []
-
-            for doc in publicaciones_docs:
-                if doc.anonimo:
-                    usuario_nombre = "Anonimo"
-                else:
-                    usuario_nombre = doc.usuario.alias
-                publicaciones.append(Publicacion(
-                    contenido=doc.contenido,
-                    fecha_creacion=doc.fecha_creacion,
-                    fecha_actualizacion=doc.fecha_actualizacion,
-                    usuario=usuario_nombre,
-                    anonimo=doc.anonimo,
-                    id=str(doc.id)
-                ))
-
-            return publicaciones
-        except DoesNotExist:
-            return []

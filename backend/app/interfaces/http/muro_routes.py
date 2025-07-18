@@ -23,9 +23,6 @@ from app.application.use_cases.reaccionar_publicacion import (
 from app.application.use_cases.eliminar_reaccion import (
     EliminarReaccionUseCase
 )
-from app.application.use_cases.obtener_publicaciones_usuario import (
-    ObtenerMisPublicacionesUseCase
-)
 
 muro_bp = Blueprint("muro", __name__, url_prefix="/api/muro")
 repositorio = MongoPublicacionRepository()
@@ -161,28 +158,3 @@ def eliminar_reaccion(publicacion_id):
         return jsonify({"error": "No se encontro la reacción a eliminar"}), 404
 
     return jsonify({"mensaje": f"Reacción '{tipo}' eliminada"}), 200
-
-
-@muro_bp.route("/mis-publicaciones", methods=["GET"])
-@jwt_required()
-def obtener_mis_publicaciones():
-    alias = get_jwt_identity()
-    use_case = ObtenerMisPublicacionesUseCase(MongoPublicacionRepository())
-    publicaciones = use_case.execute(alias)
-
-    reacciones_repo = MongoReaccionRepository()
-
-    publicaciones_json = []
-    for pub in publicaciones:
-        reacciones = reacciones_repo.contar_por_tipo(pub.id)
-        publicaciones_json.append({
-            "id": pub.id,
-            "contenido": pub.contenido,
-            "fecha_creacion": pub.fecha_creacion.isoformat(),
-            "fecha_actualizacion": pub.fecha_actualizacion.isoformat(),
-            "reacciones": reacciones,
-            "usuario": pub.usuario,
-            "anonimo": pub.anonimo
-        })
-
-    return jsonify(publicaciones_json), 200
