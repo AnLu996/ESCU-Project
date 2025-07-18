@@ -17,3 +17,8 @@ class DenunciaRepository(ABC):
     def find_by_user(self, user) -> list[Denuncia]:
         """Devuelve las denuncias de un usuario"""
         pass
+
+    @abstractmethod
+    def find_all(self) -> list[Denuncia]:
+        """Devuelve las denuncias realizadas por todos los usuarios"""
+        pass
