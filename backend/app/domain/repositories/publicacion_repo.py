@@ -24,3 +24,7 @@ class PublicacionRepository(ABC):
     @abstractmethod
     def eliminar(self, publicacion_id: str, autor_alias: str) -> bool:
         pass
+
+    @abstractmethod
+    def obtener_por_usuario(self, alias: str) -> list[Publicacion]:
+        pass
