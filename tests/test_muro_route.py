@@ -251,3 +251,80 @@ def test_reaccionar_ya_hecha(mock_user, mock_usecase_cls, client, token):
     )
     assert resp.status_code == 403
     assert resp.json["error"] == "Ya has reaccionado a esta publicación"
+
+@patch("backend.app.interfaces.http.muro_routes.UserDocument.objects")
+def test_editar_publicacion_end_to_end(mock_user_objects, monkeypatch, app, client, token):
+    # 1) Stub usuario autenticado
+    usuario = MagicMock(id="u1", alias="usuario_test")
+    mock_user_objects.return_value.first.return_value = usuario
+
+    # 2) Stub repositorios en memoria
+    storage = []
+
+    class InMemoryPubRepo:
+        def __init__(self): pass
+        def save(self, contenido, autor, anonimo):
+            pub = MagicMock(
+                id=str(len(storage) + 1),
+                contenido=contenido,
+                fecha_creacion=datetime.now(),
+                fecha_actualizacion=datetime.now(),
+                usuario=autor.alias,
+                anonimo=anonimo
+            )
+            storage.append(pub)
+            return pub
+        def update(self, pub_id, nuevo_contenido, alias):
+            # asumimos solo uno
+            storage[0].contenido = nuevo_contenido
+            return True
+        def find_all(self):
+            return list(storage)
+
+    class InMemoryReacRepo:
+        def __init__(self): pass
+        def contar_por_tipo(self, publicacion_id):
+            return {}
+
+    import backend.app.interfaces.http.muro_routes as muro_module
+
+    monkeypatch.setattr(muro_module, "MongoPublicacionRepository", lambda *args, **kw: InMemoryPubRepo())
+    monkeypatch.setattr(muro_module, "MongoReaccionRepository", lambda *args, **kw: InMemoryReacRepo())
+    monkeypatch.setattr(
+        muro_module,
+        "CrearPublicacionUseCase",
+        lambda *args, **kw: type("UC", (), {"execute": lambda self, c, a, n: InMemoryPubRepo().save(c, a, n)})()
+    )
+    monkeypatch.setattr(
+        muro_module,
+        "EditarPublicacionUseCase",
+        lambda *args, **kw: type("UC", (), {"execute": lambda self, pid, c, alias: InMemoryPubRepo().update(pid, c, alias)})()
+    )
+    monkeypatch.setattr(
+        muro_module,
+        "ObtenerPublicacionesUseCase",
+        lambda *args, **kw: type("UC", (), {"execute": lambda self: InMemoryPubRepo().find_all()})()
+    )
+
+    # 3) Publicar
+    resp1 = client.post(
+        "/api/muro/",
+        json={"contenido": "Original", "anonimo": False},
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp1.status_code == 201
+    pub_id = resp1.json["id"]
+
+    # 4) Editar
+    resp2 = client.patch(
+        f"/api/muro/{pub_id}",
+        json={"contenido": "Modificado"},
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp2.status_code == 200
+
+    # 5) Leer y comprobar
+    resp3 = client.get("/api/muro/")
+    assert resp3.status_code == 200
+    contenidos = [p["contenido"] for p in resp3.json]
+    assert "Modificado" in contenidos
