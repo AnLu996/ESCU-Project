@@ -3,6 +3,7 @@ import HomePage from '../pages/HomePage';
 import LoginPage from "../pages/Auth/LoginPage";
 import RegisterPage from "../pages/Auth/RegisterPage";
 import ChatbotPage from "../pages/ChatBotPage";
+import MuroPage from "../pages/MuroPage";
 
 export default function AuthRoutes() {
   return (
@@ -11,6 +12,7 @@ export default function AuthRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/chatbot" element={<ChatbotPage />} />
+      <Route path="/muro" element={<MuroPage />} />
     </Routes>
   );
 } 
