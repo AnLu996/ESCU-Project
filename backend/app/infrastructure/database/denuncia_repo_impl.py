@@ -28,6 +28,10 @@ class MongoDenunciaRepository(DenunciaRepository):
             usuario=user).order_by('-fecha_creacion')
         return [self._to_dict(doc) for doc in docs]
 
+    def find_all(self) -> list[Denuncia]:
+        docs = DenunciaDocument.objects.order_by('-fecha_creacion')
+        return [self._to_dict(doc) for doc in docs]
+
     """
     método privado: convierte un documento de Mongo
     en un objeto Denuncia de el dominio.
@@ -58,4 +62,5 @@ class MongoDenunciaRepository(DenunciaRepository):
             "evidencia": doc.evidencia,
             "fecha_creacion":
                 doc.fecha_creacion.isoformat() if doc.fecha_creacion else None,
+            "usuario": doc.usuario.alias if doc.usuario else None
         }
