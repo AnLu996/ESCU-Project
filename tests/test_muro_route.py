@@ -350,7 +350,6 @@ def test_publicar_y_listar_end_to_end(mock_user_objects, monkeypatch, app, clien
             return pub
         def find_all(self):
             return list(storage)
-
     class InMemoryReacRepo:
         def contar_por_tipo(self, publicacion_id):
             return {}
@@ -371,7 +370,7 @@ def test_publicar_y_listar_end_to_end(mock_user_objects, monkeypatch, app, clien
         lambda *args, **kw: type("UC", (), {"execute": lambda self: InMemoryPubRepo().find_all()})()
     )
 
-    # 1) Publicar
+    # Publicar
     resp1 = client.post(
         "/api/muro/",
         json={"contenido": "¡Hola mundo!", "anonimo": False},
@@ -380,7 +379,79 @@ def test_publicar_y_listar_end_to_end(mock_user_objects, monkeypatch, app, clien
     assert resp1.status_code == 201
     pub_id = resp1.json["id"]
 
-    # 2) Listar muro
+    # Listar muro
     resp2 = client.get("/api/muro/")
     assert resp2.status_code == 200
     assert any(p["id"] == pub_id and p["contenido"] == "¡Hola mundo!" for p in resp2.json)
+
+
+@patch("backend.app.interfaces.http.muro_routes.UserDocument.objects")
+def test_eliminar_y_listar_end_to_end(mock_user_objects, monkeypatch, app, client, token):
+    # Stub de usuario autenticado
+    usuario = MagicMock(id="u1", alias="usuario_test")
+    mock_user_objects.return_value.first.return_value = usuario
+
+    # Repositorios en memoria
+    storage = []
+    class InMemoryPubRepo:
+        def save(self, contenido, autor, anonimo):
+            pub = MagicMock(
+                id=str(len(storage) + 1),
+                contenido=contenido,
+                fecha_creacion=datetime.now(),
+                fecha_actualizacion=datetime.now(),
+                usuario=autor.alias,
+                anonimo=anonimo
+            )
+            storage.append(pub)
+            return pub
+        def delete(self, pub_id, alias):
+            storage.clear()
+            return True
+        def find_all(self):
+            return list(storage)
+    class InMemoryReacRepo:
+        def contar_por_tipo(self, publicacion_id):
+            return {}
+
+    import backend.app.interfaces.http.muro_routes as muro_module
+    monkeypatch.setattr(muro_module, "MongoPublicacionRepository",
+                        lambda *args, **kw: InMemoryPubRepo())
+    monkeypatch.setattr(muro_module, "MongoReaccionRepository",
+                        lambda *args, **kw: InMemoryReacRepo())
+    monkeypatch.setattr(
+        muro_module,
+        "CrearPublicacionUseCase",
+        lambda *args, **kw: type("UC", (), {"execute": lambda self, c, a, n: InMemoryPubRepo().save(c, a, n)})()
+    )
+    monkeypatch.setattr(
+        muro_module,
+        "EliminarPublicacionUseCase",
+        lambda *args, **kw: type("UC", (), {"execute": lambda self, pid, alias: InMemoryPubRepo().delete(pid, alias)})()
+    )
+    monkeypatch.setattr(
+        muro_module,
+        "ObtenerPublicacionesUseCase",
+        lambda *args, **kw: type("UC", (), {"execute": lambda self: InMemoryPubRepo().find_all()})()
+    )
+
+    # Creo la publicación
+    resp1 = client.post(
+        "/api/muro/",
+        json={"contenido": "Para borrar", "anonimo": False},
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp1.status_code == 201
+    pub_id = resp1.json["id"]
+
+    # La elimino
+    resp2 = client.delete(
+        f"/api/muro/{pub_id}",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp2.status_code == 200
+
+    # Hago GET y compruebo que ya no está
+    resp3 = client.get("/api/muro/")
+    assert resp3.status_code == 200
+    assert pub_id not in [p["id"] for p in resp3.json]
