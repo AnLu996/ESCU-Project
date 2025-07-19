@@ -7,12 +7,17 @@ class MongoUserRepository(UserRepository):
     def find_by_alias(self, alias: str) -> User | None:
         doc = UserDocument.objects(alias=alias).first()
         if doc:
-            return User(alias=doc.alias, password_hash=doc.password_hash)
+            return User(
+                alias=doc.alias,
+                password_hash=doc.password_hash,
+                rol=doc.rol
+            )
         return None
 
     def save(self, user: User) -> None:
         doc = UserDocument(
             alias=user.alias,
-            password_hash=user.password_hash
+            password_hash=user.password_hash,
+            rol=user.rol
         )
         doc.save()
