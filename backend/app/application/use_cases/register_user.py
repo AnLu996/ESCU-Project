@@ -7,11 +7,11 @@ class RegisterUserUseCase:
     def __init__(self, user_repo: UserRepository):
         self.user_repo = user_repo
 
-    def execute(self, alias: str, password: str) -> bool:
+    def execute(self, alias: str, password: str, rol: str = 'user') -> bool:
         if self.user_repo.find_by_alias(alias):
             return False
 
         password_hash = PasswordService.hash_password(password)
-        user = User.create(alias, password_hash)
+        user = User.create(alias, password_hash, rol=rol)
         self.user_repo.save(user)
         return True
