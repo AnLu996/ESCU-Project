@@ -8,16 +8,17 @@ function AdminDashboard() {
   const [denuncias, setDenuncias] = useState([]);
   const [posts, setPosts] = useState([]);
 
-  useEffect(() => {
+useEffect(() => {
     const fetchData = async () => {
-      const denunciasData = await adminService.getDenuncias();
-      const postsData = await adminService.getPosts();
+      const denunciasData = await adminService.getAllDenuncias();
+      const postsData = await adminService.getAllPosts();
       setDenuncias(denunciasData || []);
       setPosts(postsData || []);
     };
     fetchData();
   }, []);
 
+  
   return (
     <div className="min-h-screen bg-[#f7f9fb] relative">
       <Header />

@@ -90,28 +90,54 @@ export const denunciaService = {
 
 
 export const adminService = {
-  async getDenuncias() {
-    // Simula una API temporalmente
-    return [
-      {
-        categoria: 'Acoso',
-        descripcion: 'Un incidente en el pasillo B',
-        fechaHora: '2025-07-01T14:00',
-      },
-      {
-        categoria: 'Robo',
-        descripcion: 'Se reportó robo de laptop en la biblioteca',
-        fechaHora: '2025-07-02T09:30',
-      },
-    ];
+  getAllDenuncias: async () => {
+    try {
+      const res = await API.get('/denuncias');
+      return res.data;
+    } catch (err) {
+      console.error('Error al obtener todas las denuncias:', err);
+      return [];
+    }
   },
 
-  async getPosts() {
-    return [
-      { content: 'Hoy me siento triste 😞' },
-      { content: 'Recuerda que eres fuerte 💪' },
-    ];
+  getAllPosts: async () => {
+    try {
+      const res = await API.get('/muro');
+      return res.data;
+    } catch (err) {
+      console.error('Error al obtener todas las publicaciones:', err);
+      return [];
+    }
   },
+
+  deletePost: async (id, token) => {
+    try {
+      const res = await API.delete(`/muro/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return res.data;
+    } catch (err) {
+      console.error('Error al eliminar la publicación:', err);
+      return null;
+    }
+  },
+
+  eliminarReaccion: async (id, tipo, token) => {
+    try {
+      const res = await API.delete(`/muro/${id}/reaccionar`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        data: { reaccion: tipo }
+      });
+      return res.data;
+    } catch (err) {
+      console.error('Error al eliminar la reacción:', err);
+      return null;
+    }
+  }
 };
 
 export default API;
