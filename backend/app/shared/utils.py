@@ -2,6 +2,9 @@ import os
 from werkzeug.utils import secure_filename
 from app.config.settings import settings
 from uuid import uuid4
+from functools import wraps
+from flask import jsonify
+from flask_jwt_extended import get_jwt
 
 
 def guardar_evidencia(file):
@@ -21,3 +24,12 @@ def guardar_evidencia(file):
     file.save(file_path)
 
     return unique_name, None
+
+def admin_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        identity = get_jwt()
+        if not identity or identity.get('rol') != 'admin':
+            return jsonify({"error": "Acceso denegado"}), 403
+        return fn(*args, **kwargs)
+    return wrapper

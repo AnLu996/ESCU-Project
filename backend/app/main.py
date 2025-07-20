@@ -5,6 +5,7 @@ from app.interfaces.http.auth_routes import auth_bp
 from app.interfaces.http.muro_routes import muro_bp
 from app.interfaces.http.denuncia_routes import denuncia_bp
 from app.config.settings import settings
+from app.infrastructure.scripts.create_admin import create_admin_user
 
 jwt = JWTManager()
 
@@ -26,4 +27,7 @@ def create_app():
     app.register_blueprint(muro_bp)
     app.register_blueprint(denuncia_bp)
 
+    # Crear usuario admin si no existe
+    create_admin_user()
+    
     return app

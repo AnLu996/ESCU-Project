@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.application.use_cases.create_denuncia import CreateDenunciaUseCase
 from app.infrastructure.database.denuncia_repo_impl import (
     MongoDenunciaRepository
@@ -7,7 +7,7 @@ from app.infrastructure.database.denuncia_repo_impl import (
 from app.application.use_cases.obtener_denuncias import ObtenerDenunciasUseCase
 from app.infrastructure.database.user_document import UserDocument
 from datetime import datetime
-from app.shared.utils import guardar_evidencia
+from app.shared.utils import guardar_evidencia, admin_required
 
 denuncia_bp = Blueprint('denuncias', __name__, url_prefix='/api/denuncias')
 
@@ -79,6 +79,7 @@ def mis_denuncias():
 
 @denuncia_bp.route('/', methods=['GET'])
 @jwt_required()
+@admin_required
 def obtener_denuncias():
     usuario = get_jwt_identity()
     user = UserDocument.objects(alias=usuario).first()
