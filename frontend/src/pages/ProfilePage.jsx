@@ -1,31 +1,51 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Header from '../components/Header';
-//import { authService } from '../services/authService';
+import { denunciaService } from '../services/api';
+import { adminService } from '../services/api'; // Asegúrate que contenga getMisPosts
 
 function ProfilePage() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState('Username');
-  const [publicaciones, setPublicaciones] = useState(40); // Simulado
-  const [historialPublicaciones, setHistorialPublicaciones] = useState([
-    { id: 1, content: 'Hoy me siento triste 😞' },
-    { id: 2, content: 'Recuerda que eres fuerte 💪' },
-  ]);
-  const [historialDenuncias, setHistorialDenuncias] = useState([
-    { id: 1, motivo: 'Acoso', fecha: '2025-07-17' },
-    { id: 2, motivo: 'Lenguaje ofensivo', fecha: '2025-07-15' },
-  ]);
+  const [username, setUsername] = useState('Usuario');
+  const [publicaciones, setPublicaciones] = useState(0);
+  const [historialPublicaciones, setHistorialPublicaciones] = useState([]);
+  const [historialDenuncias, setHistorialDenuncias] = useState([]);
 
   useEffect(() => {
-    // Aquí normalmente cargarías el usuario y sus publicaciones/denuncias desde la API
-    // setUsername(apiUser.username)
-    // setPublicaciones(apiUser.publicaciones)
-    // setHistorialPublicaciones(apiUser.historialPublicaciones)
-    // setHistorialDenuncias(apiUser.historialDenuncias)
+    const fetchDatos = async () => {
+      // Simula un alias de usuario (puedes obtenerlo desde un authService o JWT en producción)
+      setUsername('usuario.alias');
+
+      // Obtener publicaciones del usuario
+      const posts = await adminService.getMisPosts?.();
+      if (posts && posts.length >= 0) {
+        setHistorialPublicaciones(
+          posts.map((p) => ({
+            id: p.id,
+            content: p.contenido,
+          }))
+        );
+        setPublicaciones(posts.length);
+      }
+
+      // Obtener denuncias del usuario
+      const denunciasRes = await denunciaService.getDenunciasByUser();
+      if (denunciasRes.success) {
+        setHistorialDenuncias(
+          denunciasRes.data.map((d) => ({
+            id: d.id,
+            motivo: d.categoria || 'Sin categoría',
+            fecha: new Date(d.fechaHora || d.fecha || '').toLocaleDateString('es-PE'),
+          }))
+        );
+      }
+    };
+
+    fetchDatos();
   }, []);
 
   const handleLogout = () => {
-    //authService.logout();
+    // Aquí puedes usar authService.logout() si lo tienes implementado
     navigate('/');
     window.location.reload();
   };
@@ -58,14 +78,18 @@ function ProfilePage() {
         <div className="mb-8">
           <h2 className="text-lg font-semibold mb-2">Historial de Publicaciones</h2>
           <div className="space-y-3">
-            {historialPublicaciones.map((post) => (
-              <div
-                key={post.id}
-                className="bg-gray-300 rounded h-8 flex items-center px-4 text-gray-600"
-              >
-                {post.content}
-              </div>
-            ))}
+            {historialPublicaciones.length === 0 ? (
+              <p className="text-gray-500">No tienes publicaciones registradas.</p>
+            ) : (
+              historialPublicaciones.map((post) => (
+                <div
+                  key={post.id}
+                  className="bg-gray-300 rounded h-8 flex items-center px-4 text-gray-600"
+                >
+                  {post.content}
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -73,15 +97,19 @@ function ProfilePage() {
         <div className="mb-8">
           <h2 className="text-lg font-semibold mb-2">Historial de Denuncias</h2>
           <div className="space-y-3">
-            {historialDenuncias.map((denuncia) => (
-              <div
-                key={denuncia.id}
-                className="bg-gray-300 rounded h-8 flex items-center px-4 text-gray-600"
-              >
-                <span className="font-bold">{denuncia.motivo}</span>
-                <span className="ml-4 text-sm">{denuncia.fecha}</span>
-              </div>
-            ))}
+            {historialDenuncias.length === 0 ? (
+              <p className="text-gray-500">No has realizado ninguna denuncia.</p>
+            ) : (
+              historialDenuncias.map((denuncia) => (
+                <div
+                  key={denuncia.id}
+                  className="bg-gray-300 rounded h-8 flex items-center px-4 text-gray-600"
+                >
+                  <span className="font-bold">{denuncia.motivo}</span>
+                  <span className="ml-4 text-sm">{denuncia.fecha}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

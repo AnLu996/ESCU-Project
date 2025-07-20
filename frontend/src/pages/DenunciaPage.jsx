@@ -79,7 +79,7 @@ function ReportPage() {
     if (archivoPrueba) datos.append('pruebas', archivoPrueba);
 
     try {
-      const result = await denunciaService.crearDenuncia(datos);
+      const result = await denunciaService.createDenuncia(datos);
 
       if (result.success) {
         mostrarMensajeBackend('Denuncia registrada exitosamente ✅', 'success');
