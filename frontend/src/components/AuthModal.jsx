@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/api';
+import { useAuth } from "../context/AuthContext";
 
-function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
+function AuthModal({ mostrarModal, setMostrarModal }) {
   const [modoRegistro, setModoRegistro] = useState(false);
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
@@ -10,6 +11,8 @@ function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
   const [error, setError] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [tipoMensaje, setTipoMensaje] = useState('');
+  const { login } = useAuth();
+
 
   const navigate = useNavigate();
 
@@ -33,7 +36,6 @@ function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
 
       const result = await authService.register({ username: usuario, password: contrasena });
       if (result.success) {
-        setIsLoggedIn(true);
         mostrarMensaje('Registro exitoso', 'success');
         setTimeout(() => {
           setMostrarModal(false);
@@ -42,10 +44,11 @@ function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
       } else {
         mostrarMensaje(result.data, 'error');
       }
+      
     } else {
       const result = await authService.login({ username: usuario, password: contrasena });
-      if (result.success) {
-        setIsLoggedIn(true);
+      if (result.token) {
+        login(result.token, result.user);
         mostrarMensaje('Inicio de sesión exitoso', 'success');
         setTimeout(() => {
           setMostrarModal(false);

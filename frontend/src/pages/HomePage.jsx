@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import AuthModal from '../components/AuthModal';
 import MiniChatBot from '../components/MiniChatBot';
@@ -8,7 +9,6 @@ import AddPostButton from '../components/AddPostButton';
 import CreatePostModal from '../components/CreatePostModal';
 
 function HomePage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [posts, setPosts] = useState([]);
   const [reacciones, setReacciones] = useState({});
@@ -16,16 +16,14 @@ function HomePage() {
   const [editandoPostId, setEditandoPostId] = useState(null);
   const [contenidoEditado, setContenidoEditado] = useState('');
   const [showCreatePostModal, setShowCreatePostModal] = useState(false);
+  const { token } = useAuth();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
     cargarPublicaciones();
   }, []);
 
   async function cargarPublicaciones() {
     const response = await muroService.getPublicaciones();
-    // Aseguramos que posts siempre es array
     const postsArray = Array.isArray(response.data) ? response.data : [];
     setPosts(postsArray);
   }
@@ -73,7 +71,7 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#e9f6ff]">
-      <Header isLoggedIn={isLoggedIn} onLoginClick={() => setMostrarModal(true)} />
+      <Header isLoggedIn={!!token} onLoginClick={() => setMostrarModal(true)} />
 
       <main className="max-w-5xl mx-auto mt-10 space-y-6 px-4">
         {posts.length === 0 ? (
@@ -106,7 +104,7 @@ function HomePage() {
                   <p className="text-gray-700 text-lg mb-2">{post.contenido}</p>
                 )}
 
-                {isLoggedIn && (
+                {token && (
                   <div className="absolute top-2 right-3">
                     <button
                       onClick={() => setModalPostId(post.id)}
@@ -117,7 +115,7 @@ function HomePage() {
                   </div>
                 )}
 
-                {isLoggedIn && (
+                {token && (
                   <div className="flex space-x-2 mt-2">
                     {reaccionesDisponibles.map((icono, index) => (
                       <button
@@ -139,7 +137,6 @@ function HomePage() {
                   </p>
                 )}
 
-                {/* Modal por post */}
                 {modalPostId === post.id && (
                   <PostOptionsModal
                     onClose={() => setModalPostId(null)}
@@ -148,7 +145,6 @@ function HomePage() {
                   />
                 )}
 
-                {/* Botones de editar */}
                 {editandoPostId === post.id && (
                   <div className="flex justify-end mt-3">
                     <button
@@ -170,13 +166,11 @@ function HomePage() {
         )}
       </main>
 
-      {/* Botón flotante para agregar post */}
-      {isLoggedIn && (
+      {token && (
         <AddPostButton onClick={() => setShowCreatePostModal(true)} />
       )}
 
-      {/* Modal para crear post */}
-      {showCreatePostModal && (
+      {showCreatePostModal && token && (
         <CreatePostModal
           onClose={() => setShowCreatePostModal(false)}
           onCreate={handleCreatePost}
@@ -186,9 +180,8 @@ function HomePage() {
       <AuthModal
         mostrarModal={mostrarModal}
         setMostrarModal={setMostrarModal}
-        setIsLoggedIn={setIsLoggedIn}
       />
-      <MiniChatBot isLoggedIn={isLoggedIn} />
+      <MiniChatBot isLoggedIn={!!token} />
     </div>
   );
 }

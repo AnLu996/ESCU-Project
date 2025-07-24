@@ -2,19 +2,28 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import { denunciaService } from '../services/api';
-import { adminService } from '../services/api'; // Asegúrate que contenga getMisPosts
+import { adminService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 function ProfilePage() {
   const navigate = useNavigate();
+  const { token, user, logout } = useAuth();
+
   const [username, setUsername] = useState('Usuario');
   const [publicaciones, setPublicaciones] = useState(0);
   const [historialPublicaciones, setHistorialPublicaciones] = useState([]);
   const [historialDenuncias, setHistorialDenuncias] = useState([]);
 
   useEffect(() => {
+    // Si no hay sesión, redirige al inicio
+    if (!token) {
+      navigate('/');
+      return;
+    }
+
     const fetchDatos = async () => {
-      // Simula un alias de usuario (puedes obtenerlo desde un authService o JWT en producción)
-      setUsername('usuario.alias');
+      // Usa alias del usuario si lo tienes en el contexto
+      setUsername(user?.alias || user?.username || 'Usuario');
 
       // Obtener publicaciones del usuario
       const posts = await adminService.getMisPosts?.();
@@ -42,13 +51,30 @@ function ProfilePage() {
     };
 
     fetchDatos();
-  }, []);
+  }, [token, user, navigate]);
 
   const handleLogout = () => {
-    // Aquí puedes usar authService.logout() si lo tienes implementado
+    logout(); // Usa el contexto para cerrar sesión y limpiar el token
     navigate('/');
-    window.location.reload();
   };
+
+  // Si no hay token, muestra mensaje de login requerido
+  if (!token) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#e9f6ff]">
+        <Header />
+        <div className="max-w-md mx-auto text-center mt-20">
+          <h2 className="text-2xl font-bold text-blue-700 mb-4">Debes iniciar sesión para ver tu perfil</h2>
+          <button
+            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+            onClick={() => navigate('/')}
+          >
+            Ir a inicio
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#e9f6ff]">

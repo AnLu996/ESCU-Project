@@ -1,8 +1,10 @@
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-function Header({ isLoggedIn, onLoginClick }) {
+function Header({ onLoginClick }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { token } = useAuth();
 
   return (
     <header className="bg-blue-900 text-white py-6 shadow">
@@ -22,7 +24,7 @@ function Header({ isLoggedIn, onLoginClick }) {
                 ¡Denuncia ya!
               </button>
             )}
-            {isLoggedIn ? (
+            {token ? (
               <img
                 src="/user-icon.png"
                 alt="Usuario"
@@ -42,6 +44,5 @@ function Header({ isLoggedIn, onLoginClick }) {
     </header>
   );
 }
-
 
 export default Header;
