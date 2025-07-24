@@ -97,16 +97,23 @@ export const denunciaService = {
 // ─────────────────────────────────────────────
 export const muroService = {
   createPublicacion: async (contenido, anonimo = false) => {
-    try {
-      const res = await API.post('/muro/', { contenido, anonimo });
-      return { success: true, data: res.data };
-    } catch (err) {
-      return {
-        success: false,
-        data: err.response?.data?.error || 'Error al crear publicación'
-      };
-    }
-  },
+      if (!contenido || contenido.trim() === "") {
+        return {
+          success: false,
+          data: "El contenido no puede estar vacío"
+        };
+      }
+      try {
+        const res = await API.post('/muro/', { contenido: contenido.trim(), anonimo });
+        // El backend devuelve la publicación completa: id, contenido, fecha_creacion, reacciones, anonimo
+        return { success: true, data: res.data };
+      } catch (err) {
+        return {
+          success: false,
+          data: err.response?.data?.error || 'Error al crear publicación'
+        };
+      }
+    },
 
   getPublicaciones: async () => {
     try {
@@ -129,8 +136,15 @@ export const muroService = {
   },
 
   editPublicacion: async (id, nuevoContenido) => {
+    if (!nuevoContenido || nuevoContenido.trim() === "") {
+      return {
+        success: false,
+        data: "El contenido no puede estar vacío"
+      };
+    }
     try {
-      const res = await API.patch(`/muro/${id}`, { contenido: nuevoContenido });
+      const res = await API.patch(`/muro/${id}`, { contenido: nuevoContenido.trim() });
+      // Mensaje de éxito: "Publicación editada correctamente"
       return { success: true, data: res.data };
     } catch (err) {
       return {
@@ -143,10 +157,13 @@ export const muroService = {
   deletePublicacion: async (id) => {
     try {
       const res = await API.delete(`/muro/${id}`);
-      return res.data;
+      // Mensaje de éxito: "Publicación eliminada correctamente"
+      return { success: true, data: res.data };
     } catch (err) {
-      console.error('Error al eliminar publicación:', err);
-      return null;
+      return {
+        success: false,
+        data: err.response?.data?.error || 'Error al eliminar publicación'
+      };
     }
   },
 

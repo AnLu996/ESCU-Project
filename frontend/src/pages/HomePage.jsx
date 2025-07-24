@@ -4,8 +4,10 @@ import AuthModal from '../components/AuthModal';
 import MiniChatBot from '../components/MiniChatBot';
 import { muroService } from '../services/api';
 import PostOptionsModal from '../components/PostOptionsModal';
+import AddPostButton from '../components/AddPostButton';
+import CreatePostModal from '../components/CreatePostModal';
 
-function MuroPage() {
+function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [posts, setPosts] = useState([]);
@@ -13,6 +15,7 @@ function MuroPage() {
   const [modalPostId, setModalPostId] = useState(null);
   const [editandoPostId, setEditandoPostId] = useState(null);
   const [contenidoEditado, setContenidoEditado] = useState('');
+  const [showCreatePostModal, setShowCreatePostModal] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -21,8 +24,10 @@ function MuroPage() {
   }, []);
 
   async function cargarPublicaciones() {
-    const data = await muroService.getPublicaciones();
-    setPosts(data);
+    const response = await muroService.getPublicaciones();
+    // Aseguramos que posts siempre es array
+    const postsArray = Array.isArray(response.data) ? response.data : [];
+    setPosts(postsArray);
   }
 
   const manejarReaccion = async (postId, reaccion) => {
@@ -47,14 +52,20 @@ function MuroPage() {
   };
 
   const handleGuardar = async () => {
-    await muroService.editarPublicacion(editandoPostId, contenidoEditado);
+    await muroService.editPublicacion(editandoPostId, contenidoEditado);
     setEditandoPostId(null);
     cargarPublicaciones();
   };
 
   const handleEliminar = async (postId) => {
-    await muroService.eliminarPublicacion(postId);
+    await muroService.deletePublicacion(postId);
     setModalPostId(null);
+    cargarPublicaciones();
+  };
+
+  const handleCreatePost = async ({ contenido, anonimo }) => {
+    await muroService.createPublicacion(contenido, anonimo);
+    setShowCreatePostModal(false);
     cargarPublicaciones();
   };
 
@@ -159,6 +170,19 @@ function MuroPage() {
         )}
       </main>
 
+      {/* Botón flotante para agregar post */}
+      {isLoggedIn && (
+        <AddPostButton onClick={() => setShowCreatePostModal(true)} />
+      )}
+
+      {/* Modal para crear post */}
+      {showCreatePostModal && (
+        <CreatePostModal
+          onClose={() => setShowCreatePostModal(false)}
+          onCreate={handleCreatePost}
+        />
+      )}
+
       <AuthModal
         mostrarModal={mostrarModal}
         setMostrarModal={setMostrarModal}
@@ -169,4 +193,4 @@ function MuroPage() {
   );
 }
 
-export default MuroPage;
+export default HomePage;
