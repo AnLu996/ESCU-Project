@@ -16,6 +16,21 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Función para decodificar JWT
+function parseJwt(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    console.error('Error parsing JWT:', e);
+    return null;
+  }
+}
+
 // ─────────────────────────────────────────────
 // Autenticación
 // ─────────────────────────────────────────────
@@ -23,18 +38,42 @@ export const authService = {
 
   login: async (credentials) => {
     try {
-      const res = await API.post('/auth/login', credentials);
-      const data = res.data;
-      if (res.status === 200 && data.token) {
-        localStorage.setItem('token', data.token);
-        return { success: true, data };
+      const response = await API.post('/auth/login', credentials); // Cambiado a API y ruta correcta
+      
+      if (response.data.error) {
+        return { error: response.data.error };
       }
-      return { success: false, data };
-    } catch (err) {
-      return {
-        success: false,
-        data: err.response?.data?.error || 'Error de autenticación'
+
+      if (!response.data.token) {
+        return { error: 'No se recibió token en la respuesta' };
+      }
+
+      const tokenData = parseJwt(response.data.token);
+      if (!tokenData) {
+        return { error: 'Error procesando credenciales' };
+      }
+
+      const user = {
+        username: tokenData.identity,
+        rol: tokenData.rol
       };
+
+      return { 
+        token: response.data.token,
+        user: user
+      };
+      
+    } catch (error) {
+      console.error('Error en login:', error);
+      if (error.response) {
+        if (error.response.status === 400) {
+          return { error: 'Usuario y contraseña son requeridos' };
+        }
+        if (error.response.status === 401) {
+          return { error: error.response.data?.error || 'Credenciales inválidas' };
+        }
+      }
+      return { error: 'Error de conexión con el servidor' };
     }
   },
 

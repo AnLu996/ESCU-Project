@@ -1,12 +1,15 @@
 // src/App.jsx
 import Routes from './routes/Routes';
+import { AuthProvider } from './context/AuthContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css'
 
-export default function App() {
+function App() {
   return (
-    <div>
+    <AuthProvider>
       <Routes />
-    </div>
+    </AuthProvider>
   );
 }
+
+export default App;

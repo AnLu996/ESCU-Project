@@ -6,16 +6,9 @@ import { denunciaService } from '../services/api';
 
 function ReportPage() {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { isAuthenticated } = useAuth(); // Cambiamos de token a isAuthenticated
 
-  // Si no hay token, redirige a login (puedes cambiar la ruta si usas un modal)
-  useEffect(() => {
-    if (!token) {
-      navigate('/');
-      // Opcional: Puedes mostrar una alerta antes de redirigir
-      // alert('Debes iniciar sesión para acceder al formulario de denuncia');
-    }
-  }, [token, navigate]);
+  
 
   const [formData, setFormData] = useState({
     categoria: '',
@@ -104,7 +97,7 @@ function ReportPage() {
   };
 
   // Renderizado condicional si no hay token (mejor experiencia de usuario)
-  if (!token) {
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f7f9fb]">
         <Header />
