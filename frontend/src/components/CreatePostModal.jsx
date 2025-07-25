@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import { useAuth } from "../context/AuthContext";
 
 function CreatePostModal({ onClose, onCreate }) {
   const [contenido, setContenido] = useState("");
   const [anonimo, setAnonimo] = useState(false);
+  const { token } = useAuth();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -13,6 +15,9 @@ function CreatePostModal({ onClose, onCreate }) {
       onClose();
     }
   };
+
+  // Solo mostrar el modal si hay token (sesión activa)
+  if (!token) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center">

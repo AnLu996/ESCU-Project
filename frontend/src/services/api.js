@@ -7,7 +7,7 @@ const API = axios.create({
 // Interceptor para añadir token automáticamente
 API.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -16,30 +16,64 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Función para verificar rol de admin
+const checkAdminRole = () => {
+  const token = sessionStorage.getItem("token");
+  if (!token) return false;
+  
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(base64));
+    return payload.rol === 'admin';
+  } catch (e) {
+    console.error('Error decoding token:', e);
+    return false;
+  }
+};
+
 // ─────────────────────────────────────────────
-// Autenticación
+// Servicio de Autenticación
 // ─────────────────────────────────────────────
 export const authService = {
   login: async (credentials) => {
     try {
-      const res = await API.post('/auth/login', credentials);
-      const data = res.data;
-      if (res.status === 200 && data.token) {
-        localStorage.setItem('token', data.token);
-        return { success: true, data };
+      const response = await API.post('/auth/login', credentials);
+      
+      if (response.data.error) {
+        return { error: response.data.error };
       }
-      return { success: false, data };
-    } catch (err) {
-      return {
-        success: false,
-        data: err.response?.data?.error || 'Error de autenticación'
+
+      if (!response.data.token) {
+        return { error: 'No se recibió token en la respuesta' };
+      }
+
+      return { 
+        token: response.data.token,
+        user: {
+          username: response.data.user?.alias || response.data.user?.username,
+          email: response.data.user?.email,
+          rol: response.data.user?.rol
+        }
       };
+      
+    } catch (error) {
+      console.error('Error en login:', error);
+      if (error.response) {
+        if (error.response.status === 400) {
+          return { error: 'Usuario y contraseña son requeridos' };
+        }
+        if (error.response.status === 401) {
+          return { error: error.response.data?.error || 'Credenciales inválidas' };
+        }
+      }
+      return { error: 'Error de conexión con el servidor' };
     }
   },
 
-  register: async (credentials) => {
+  register: async (userData) => {
     try {
-      const res = await API.post('/auth/register', credentials);
+      const res = await API.post('/auth/register', userData);
       return {
         success: true,
         data: res.data
@@ -53,14 +87,30 @@ export const authService = {
   },
 
   logout: () => {
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
   },
 
-  getToken: () => localStorage.getItem('token')
+  getCurrentUser: () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) return null;
+    
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(base64));
+      return {
+        username: payload.identity,
+        rol: payload.rol
+      };
+    } catch (e) {
+      console.error('Error decoding token:', e);
+      return null;
+    }
+  }
 };
 
 // ─────────────────────────────────────────────
-// Denuncias
+// Servicio de Denuncias
 // ─────────────────────────────────────────────
 export const denunciaService = {
   createDenuncia: async (formData) => {
@@ -74,7 +124,7 @@ export const denunciaService = {
     } catch (err) {
       return {
         success: false,
-        data: err.response?.data?.error || 'Error al enviar denuncia'
+        error: err.response?.data?.error || 'Error al enviar denuncia'
       };
     }
   },
@@ -86,52 +136,75 @@ export const denunciaService = {
     } catch (err) {
       return {
         success: false,
-        data: err.response?.data?.error || 'Error al obtener denuncias'
+        error: err.response?.data?.error || 'Error al obtener denuncias'
+      };
+    }
+  },
+
+  getAllDenuncias: async () => {
+    if (!checkAdminRole()) {
+      return { success: false, error: 'No tienes permisos de administrador' };
+    }
+
+    try {
+      const res = await API.get('/denuncias/');
+      return { success: true, data: res.data };
+    } catch (err) {
+      return {
+        success: false,
+        error: err.response?.data?.error || 'Error al obtener denuncias'
       };
     }
   }
 };
 
 // ─────────────────────────────────────────────
-// Muro / Publicaciones
+// Servicio de Publicaciones (Muro)
 // ─────────────────────────────────────────────
 export const muroService = {
   createPublicacion: async (contenido, anonimo = false) => {
-      if (!contenido || contenido.trim() === "") {
-        return {
-          success: false,
-          data: "El contenido no puede estar vacío"
-        };
-      }
-      try {
-        const res = await API.post('/muro/', { contenido: contenido.trim(), anonimo });
-        // El backend devuelve la publicación completa: id, contenido, fecha_creacion, reacciones, anonimo
-        return { success: true, data: res.data };
-      } catch (err) {
-        return {
-          success: false,
-          data: err.response?.data?.error || 'Error al crear publicación'
-        };
-      }
-    },
+    if (!contenido || contenido.trim() === "") {
+      return {
+        success: false,
+        error: "El contenido no puede estar vacío"
+      };
+    }
+
+    try {
+      const res = await API.post('/muro/', { 
+        contenido: contenido.trim(), 
+        anonimo 
+      });
+      return { success: true, data: res.data };
+    } catch (err) {
+      return {
+        success: false,
+        error: err.response?.data?.error || 'Error al crear publicación'
+      };
+    }
+  },
 
   getPublicaciones: async () => {
     try {
       const res = await API.get('/muro/');
-      return res.data;
+      return { success: true, data: res.data };
     } catch (err) {
-      console.error('Error al obtener publicaciones:', err);
-      return [];
+      return {
+        success: false,
+        error: err.response?.data?.error || 'Error al obtener publicaciones'
+      };
     }
   },
 
   getMisPublicaciones: async () => {
     try {
       const res = await API.get('/muro/mis-publicaciones');
-      return res.data;
+      return { success: true, data: res.data };
     } catch (err) {
-      console.error('Error al obtener mis publicaciones:', err);
-      return [];
+      return {
+        success: false,
+        error: err.response?.data?.error || 'Error al obtener publicaciones'
+      };
     }
   },
 
@@ -139,17 +212,19 @@ export const muroService = {
     if (!nuevoContenido || nuevoContenido.trim() === "") {
       return {
         success: false,
-        data: "El contenido no puede estar vacío"
+        error: "El contenido no puede estar vacío"
       };
     }
+
     try {
-      const res = await API.patch(`/muro/${id}`, { contenido: nuevoContenido.trim() });
-      // Mensaje de éxito: "Publicación editada correctamente"
+      const res = await API.patch(`/muro/${id}`, { 
+        contenido: nuevoContenido.trim() 
+      });
       return { success: true, data: res.data };
     } catch (err) {
       return {
         success: false,
-        data: err.response?.data?.error || 'Error al editar publicación'
+        error: err.response?.data?.error || 'Error al editar publicación'
       };
     }
   },
@@ -157,12 +232,11 @@ export const muroService = {
   deletePublicacion: async (id) => {
     try {
       const res = await API.delete(`/muro/${id}`);
-      // Mensaje de éxito: "Publicación eliminada correctamente"
       return { success: true, data: res.data };
     } catch (err) {
       return {
         success: false,
-        data: err.response?.data?.error || 'Error al eliminar publicación'
+        error: err.response?.data?.error || 'Error al eliminar publicación'
       };
     }
   },
@@ -170,10 +244,12 @@ export const muroService = {
   reaccionar: async (id, tipo) => {
     try {
       const res = await API.post(`/muro/${id}/reaccionar`, { reaccion: tipo });
-      return res.data;
+      return { success: true, data: res.data };
     } catch (err) {
-      console.error('Error al reaccionar:', err);
-      return null;
+      return {
+        success: false,
+        error: err.response?.data?.error || 'Error al reaccionar'
+      };
     }
   },
 
@@ -182,45 +258,61 @@ export const muroService = {
       const res = await API.delete(`/muro/${id}/reaccionar`, {
         data: { reaccion: tipo }
       });
-      return res.data;
+      return { success: true, data: res.data };
     } catch (err) {
-      console.error('Error al eliminar la reacción:', err);
-      return null;
+      return {
+        success: false,
+        error: err.response?.data?.error || 'Error al eliminar reacción'
+      };
     }
   }
 };
 
 // ─────────────────────────────────────────────
-// Admin (para usuarios con rol admin en el JWT)
+// Servicio de Administración
 // ─────────────────────────────────────────────
 export const adminService = {
   getAllDenuncias: async () => {
+    if (!checkAdminRole()) {
+      return { success: false, error: 'No tienes permisos de administrador' };
+    }
+
     try {
       const res = await API.get('/denuncias/');
-      return res.data;
+      return { success: true, data: res.data };
     } catch (err) {
-      console.error('Error al obtener todas las denuncias:', err);
-      return [];
+      return {
+        success: false,
+        error: err.response?.data?.error || 'Error al obtener denuncias'
+      };
     }
   },
 
   getAllPosts: async () => {
+    if (!checkAdminRole()) {
+      return { success: false, error: 'No tienes permisos de administrador' };
+    }
+
     try {
       const res = await API.get('/muro');
-      return res.data;
+      return { success: true, data: res.data };
     } catch (err) {
-      console.error('Error al obtener todas las publicaciones:', err);
-      return [];
+      return {
+        success: false,
+        error: err.response?.data?.error || 'Error al obtener publicaciones'
+      };
     }
   },
 
   getMisPosts: async () => {
     try {
       const res = await API.get('/muro/mis-publicaciones');
-      return res.data;
+      return { success: true, data: res.data };
     } catch (err) {
-      console.error('Error al obtener mis publicaciones:', err);
-      return [];
+      return {
+        success: false,
+        error: err.response?.data?.error || 'Error al obtener publicaciones'
+      };
     }
   }
 };

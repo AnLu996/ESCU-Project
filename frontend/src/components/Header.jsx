@@ -1,8 +1,26 @@
+import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-function Header({ isLoggedIn, onLoginClick }) {
+function Header({ onLoginClick }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated, user, logout } = useAuth();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Cerrar dropdown al hacer clic fuera
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="bg-blue-900 text-white py-6 shadow">
@@ -14,7 +32,7 @@ function Header({ isLoggedIn, onLoginClick }) {
           </div>
 
           <div className="col-span-5 flex justify-end items-center space-x-4">
-            {location.pathname !== '/denuncia' && (
+            {isAuthenticated && location.pathname !== '/denuncia' && (
               <button
                 onClick={() => navigate('/denuncia')}
                 className="bg-red-600 text-white px-5 py-2 text-lg rounded-lg hover:bg-red-700 transition"
@@ -22,12 +40,51 @@ function Header({ isLoggedIn, onLoginClick }) {
                 ¡Denuncia ya!
               </button>
             )}
-            {isLoggedIn ? (
-              <img
-                src="/user-icon.png"
-                alt="Usuario"
-                className="rounded-full w-[45px] h-[45px]"
-              />
+            
+            {isAuthenticated ? (
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center space-x-1 focus:outline-none"
+                >
+                  <span className="font-medium">{user?.username || 'Usuario'}</span>
+                  <svg
+                    className={`w-4 h-4 transition-transform ${dropdownOpen ? 'transform rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+                    <div className="py-1">
+                      <button
+                        onClick={() => {
+                          navigate('/user-profile');
+                          setDropdownOpen(false);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                      >
+                        Mi perfil
+                      </button>
+                      <button
+                        onClick={() => {
+                          logout();
+                          navigate('/');
+                          setDropdownOpen(false);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                      >
+                        Cerrar sesión
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <button
                 className="bg-white text-blue-900 px-5 py-2 text-lg rounded-lg hover:bg-gray-100 transition"
@@ -42,6 +99,5 @@ function Header({ isLoggedIn, onLoginClick }) {
     </header>
   );
 }
-
 
 export default Header;

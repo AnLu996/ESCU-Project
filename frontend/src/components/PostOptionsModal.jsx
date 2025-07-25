@@ -1,9 +1,10 @@
 import PropTypes from "prop-types";
-
 import { useEffect, useRef } from "react";
+import { useAuth } from "../context/AuthContext";
 
 function PostOptionsModal({ onClose, onEditar, onEliminar }) {
   const modalRef = useRef(null);
+  const { token } = useAuth();
 
   // Focus inicial para accesibilidad
   useEffect(() => {
@@ -27,6 +28,9 @@ function PostOptionsModal({ onClose, onEditar, onEliminar }) {
     onEliminar?.();
     onClose?.();
   };
+
+  // Solo mostrar modal si hay sesión
+  if (!token) return null;
 
   return (
     <div

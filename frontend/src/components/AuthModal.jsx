@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/api';
+import { useAuth } from "../context/AuthContext";
 
-function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
+function AuthModal({ mostrarModal, setMostrarModal }) {
   const [modoRegistro, setModoRegistro] = useState(false);
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
@@ -10,12 +11,12 @@ function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
   const [error, setError] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [tipoMensaje, setTipoMensaje] = useState('');
+  const { login } = useAuth();
 
   const navigate = useNavigate();
 
-  const mostrarMensaje = (data, tipo = 'success') => {
-    const texto = typeof data === 'string' ? data : data?.error || JSON.stringify(data);
-    setMensaje(texto);
+  const mostrarMensaje = (mensaje, tipo = 'success') => {
+    setMensaje(mensaje);
     setTipoMensaje(tipo);
     setTimeout(() => setMensaje(''), 3000);
   };
@@ -25,35 +26,55 @@ function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
     setError('');
     setMensaje('');
 
-    if (modoRegistro) {
-      if (contrasena !== confirmarContrasena) return setError('Las contraseñas no coinciden.');
-      if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(contrasena)) {
-        return setError('Contraseña insegura. Usa mayúsculas, minúsculas y números.');
-      }
+    try {
+      if (modoRegistro) {
+        if (contrasena !== confirmarContrasena) {
+          return setError('Las contraseñas no coinciden.');
+        }
+        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(contrasena)) {
+          return setError('Contraseña insegura. Usa mayúsculas, minúsculas y números.');
+        }
 
-      const result = await authService.register({ username: usuario, password: contrasena });
-      if (result.success) {
-        setIsLoggedIn(true);
-        mostrarMensaje('Registro exitoso', 'success');
-        setTimeout(() => {
-          setMostrarModal(false);
-          navigate('/');
-        }, 1000);
+        const result = await authService.register({ 
+          username: usuario, 
+          password: contrasena 
+        });
+        
+        if (result.error) {
+          mostrarMensaje(result.error, 'error');
+        } else {
+          mostrarMensaje('Registro exitoso. Por favor inicia sesión.', 'success');
+          setModoRegistro(false);
+          setUsuario('');
+          setContrasena('');
+          setConfirmarContrasena('');
+        }
       } else {
-        mostrarMensaje(result.data, 'error');
+        if (!usuario || !contrasena) {
+          return setError('Usuario y contraseña son requeridos');
+        }
+
+        const result = await authService.login({ 
+          username: usuario, 
+          password: contrasena 
+        });
+        
+        if (result.error) {
+          mostrarMensaje(result.error, 'error');
+        } else {
+          login(result.token, result.user);
+          mostrarMensaje('Inicio de sesión exitoso', 'success');
+          
+          setTimeout(() => {
+            setMostrarModal(false);
+            navigate('/');
+            window.location.reload();
+          }, 1000);
+        }
       }
-    } else {
-      const result = await authService.login({ username: usuario, password: contrasena });
-      if (result.success) {
-        setIsLoggedIn(true);
-        mostrarMensaje('Inicio de sesión exitoso', 'success');
-        setTimeout(() => {
-          setMostrarModal(false);
-          navigate('/');
-        }, 1000);
-      } else {
-        mostrarMensaje(result.data, 'error');
-      }
+    } catch (err) {
+      mostrarMensaje('Error de conexión con el servidor', 'error');
+      console.error(err);
     }
   };
 
@@ -61,7 +82,18 @@ function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
     mostrarModal && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.65)] backdrop-blur-sm">
         <div className="absolute top-4 right-4">
-          <button onClick={() => setMostrarModal(false)} className="text-white text-2xl font-bold">×</button>
+          <button 
+            onClick={() => {
+              setMostrarModal(false);
+              setUsuario('');
+              setContrasena('');
+              setConfirmarContrasena('');
+              setError('');
+            }} 
+            className="text-white text-2xl font-bold hover:text-gray-300 transition"
+          >
+            ×
+          </button>
         </div>
 
         <div className="bg-white/95 backdrop-blur-md rounded-3xl overflow-hidden shadow-2xl w-full max-w-4xl flex flex-col md:flex-row">
@@ -82,6 +114,7 @@ function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
                   onChange={(e) => setUsuario(e.target.value)}
                   placeholder="Tu nombre de usuario"
                   className="w-full p-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  required
                 />
               </div>
               <div>
@@ -92,6 +125,7 @@ function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
                   onChange={(e) => setContrasena(e.target.value)}
                   placeholder="Contraseña"
                   className="w-full p-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  required
                 />
               </div>
               {modoRegistro && (
@@ -103,13 +137,15 @@ function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
                     onChange={(e) => setConfirmarContrasena(e.target.value)}
                     placeholder="Repite la contraseña"
                     className="w-full p-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    required
                   />
                 </div>
               )}
               {error && <p className="text-red-600 text-sm text-center font-medium">{error}</p>}
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+                disabled={!usuario || !contrasena || (modoRegistro && !confirmarContrasena)}
               >
                 {modoRegistro ? 'Registrarme' : 'Entrar'}
               </button>
@@ -127,6 +163,9 @@ function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
               onClick={() => {
                 setModoRegistro(!modoRegistro);
                 setError('');
+                setUsuario('');
+                setContrasena('');
+                setConfirmarContrasena('');
               }}
               className="bg-white border border-blue-500 text-blue-600 px-5 py-2 rounded hover:bg-blue-50 transition"
             >
@@ -135,7 +174,6 @@ function AuthModal({ mostrarModal, setMostrarModal, setIsLoggedIn }) {
           </div>
         </div>
 
-        {/* Alerta visual */}
         {mensaje && (
           <div className={`fixed bottom-4 left-4 px-4 py-2 rounded shadow-md z-50 ${
             tipoMensaje === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
