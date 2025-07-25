@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.application.use_cases.create_denuncia import CreateDenunciaUseCase
+from app.application.use_cases.eliminar_denuncia import EliminarDenunciaUseCase
 from app.infrastructure.database.denuncia_repo_impl import (
     MongoDenunciaRepository
 )
@@ -89,3 +90,18 @@ def obtener_denuncias():
     publicaciones = use_case.execute()
 
     return jsonify(publicaciones), 200
+
+
+@denuncia_bp.route('/<string:denuncia_id>', methods=['DELETE'])
+@jwt_required()
+@admin_required
+def borrar_denuncia(denuncia_id):
+    use_case = EliminarDenunciaUseCase(MongoDenunciaRepository())
+    success = use_case.execute(denuncia_id)
+
+    if success:
+        return jsonify({"message": "Denuncia eliminada correctamente"}), 200
+    else:
+        return jsonify({"message": "No se encontró la denuncia"}), 404
+
+

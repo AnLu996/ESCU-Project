@@ -31,6 +31,10 @@ class MongoDenunciaRepository(DenunciaRepository):
     def find_all(self) -> list[Denuncia]:
         docs = DenunciaDocument.objects.order_by('-fecha_creacion')
         return [self._to_dict(doc) for doc in docs]
+    
+    def eliminar_por_id(self, denuncia_id: str) -> bool:
+        result = DenunciaDocument.objects(id=denuncia_id).delete()
+        return result > 0
 
     """
     método privado: convierte un documento de Mongo
