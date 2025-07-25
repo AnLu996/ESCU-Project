@@ -22,3 +22,9 @@ class DenunciaRepository(ABC):
     def find_all(self) -> list[Denuncia]:
         """Devuelve las denuncias realizadas por todos los usuarios"""
         pass
+
+    @abstractmethod
+    def eliminar_por_id(self, denuncia_id: str) -> bool: 
+        """Elimina una denuncia por su ID"""
+        pass
+
