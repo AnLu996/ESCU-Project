@@ -25,14 +25,21 @@ function ProfilePage() {
         
         // Obtener publicaciones del usuario
         const postsResponse = await muroService.getMisPublicaciones();
-        if (Array.isArray(postsResponse)) {
-          setPublicaciones(postsResponse);
+        if (postsResponse.success && Array.isArray(postsResponse.data)) {
+          setPublicaciones(postsResponse.data);
+        } else {
+          setPublicaciones([]);
         }
 
         // Obtener denuncias del usuario
         const denunciasResponse = await denunciaService.getDenunciasByUser();
+        console.log('Datos de denuncia:', denunciasResponse);
+        console.log('Campo fechaHora:', denunciasResponse.fechaHora);
+        console.log('Campo fecha:', denunciasResponse.fecha);
         if (denunciasResponse.success && Array.isArray(denunciasResponse.data)) {
           setDenuncias(denunciasResponse.data);
+        } else {
+          setDenuncias([]);
         }
 
       } catch (err) {
