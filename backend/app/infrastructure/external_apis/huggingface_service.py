@@ -1,14 +1,11 @@
 import requests
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
+from app.config.settings import settings  
 
 class HuggingFaceChatService:
     def __init__(self):
-        self.api_url = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1"
+        self.api_url = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium"
         self.headers = {
-            "Authorization": f"Bearer {os.getenv('HUGGINGFACE_API_KEY')}",
+            "Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}",
             "Content-Type": "application/json"
         }
 

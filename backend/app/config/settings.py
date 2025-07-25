@@ -24,5 +24,9 @@ class Settings:
     UPLOADS_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads', 'denuncias')
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'mp4', 'avi'}
 
+    # OpenAI / Hugging Face
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
 
+    #print(f"OPENAI_API_KEY cargada?: {os.getenv('OPENAI_API_KEY') is not None}")
 settings = Settings()
