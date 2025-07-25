@@ -153,4 +153,4 @@ bower_components/
 *.thumb
 *.sketch
 
-.env
+.env.env
