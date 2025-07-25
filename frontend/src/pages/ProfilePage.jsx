@@ -36,7 +36,7 @@ function ProfilePage() {
         console.log('Datos de denuncias recibidos:', denunciasResponse); // Para depuración
         
         if (denunciasResponse.success && Array.isArray(denunciasResponse.data)) {
-          // Aseguramos que las fechas sean válidas antes de guardarlas
+
           const denunciasConFechasValidas = denunciasResponse.data.map(denuncia => ({
             ...denuncia,
             fechaValida: denuncia.fechaHora || denuncia.fecha || denuncia.createdAt

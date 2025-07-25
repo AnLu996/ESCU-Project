@@ -7,7 +7,6 @@ function ChatBotPage() {
   const [mostrarModal, setMostrarModal] = useState(false);
   const [mensaje, setMensaje] = useState('');
   const [conversacion, setConversacion] = useState(() => {
-    // Cargar conversación desde localStorage
     const almacenado = localStorage.getItem('chat_conversacion');
     return almacenado ? JSON.parse(almacenado) : [];
   });

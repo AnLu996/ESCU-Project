@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
-import { adminService } from '../services/api'; // Suponiendo que tienes funciones como getDenuncias, getPosts, etc.
+import { adminService } from '../services/api'; 
 
 function AdminDashboard() {
   const navigate = useNavigate();

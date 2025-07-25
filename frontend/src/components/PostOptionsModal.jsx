@@ -6,10 +6,8 @@ function PostOptionsModal({ onClose, onEditar, onEliminar }) {
   const modalRef = useRef(null);
   const { token } = useAuth();
 
-  // Focus inicial para accesibilidad
   useEffect(() => {
     modalRef.current?.focus();
-    // Cerrar con Escape
     const handleKeyDown = (e) => {
       if (e.key === "Escape") onClose();
     };
@@ -17,7 +15,6 @@ function PostOptionsModal({ onClose, onEditar, onEliminar }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
-  // Evitar doble click
   const handleEditar = (e) => {
     e.preventDefault();
     onEditar?.();
@@ -29,7 +26,6 @@ function PostOptionsModal({ onClose, onEditar, onEliminar }) {
     onClose?.();
   };
 
-  // Solo mostrar modal si hay sesión
   if (!token) return null;
 
   return (

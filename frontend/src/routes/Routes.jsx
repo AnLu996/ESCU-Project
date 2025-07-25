@@ -6,10 +6,8 @@ import UserProfile from "../pages/ProfilePage";
 import ChatBotPage from "../pages/ChatBotPage";
 import { useAuth } from "../context/AuthContext";
 
-// Componente para rutas protegidas
 function PrivateRoute({ children }) {
   const { token } = useAuth();
-  // Si no hay token, redirige a "/"
   return token ? children : <Navigate to="/" replace />;
 }
 

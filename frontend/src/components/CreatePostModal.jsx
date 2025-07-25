@@ -16,7 +16,6 @@ function CreatePostModal({ onClose, onCreate }) {
     }
   };
 
-  // Solo mostrar el modal si hay token (sesión activa)
   if (!token) return null;
 
   return (
