@@ -317,4 +317,51 @@ export const adminService = {
   }
 };
 
+// ─────────────────────────────────────────────
+// Servicio de Chatbot
+// ─────────────────────────────────────────────
+export const chatbotService = {
+  sendMessage: async (message) => {
+    if (!message || message.trim() === "") {
+      return {
+        success: false,
+        error: "El mensaje no puede estar vacío"
+      };
+    }
+
+    try {
+      const res = await API.post('/chatbot', { 
+        mensaje: message.trim()
+      });
+      return { 
+        success: true, 
+        data: {
+          respuesta: res.data.respuesta
+        } 
+      };
+    } catch (err) {
+      if (err.response) {
+        if (err.response.status === 400) {
+          return { 
+            success: false, 
+            error: err.response.data?.error || 'Formato de solicitud inválido' 
+          };
+        }
+        if (err.response.status === 401) {
+          return { 
+            success: false, 
+            error: 'No autorizado. Por favor inicia sesión.' 
+          };
+        }
+      }
+      return {
+        success: false,
+        error: err.response?.data?.error || 'Error al comunicarse con el chatbot'
+      };
+    }
+  }
+};
+
+
+
 export default API;
