@@ -33,11 +33,15 @@ function ProfilePage() {
 
         // Obtener denuncias del usuario
         const denunciasResponse = await denunciaService.getDenunciasByUser();
-        console.log('Datos de denuncia:', denunciasResponse);
-        console.log('Campo fechaHora:', denunciasResponse.fechaHora);
-        console.log('Campo fecha:', denunciasResponse.fecha);
+        console.log('Datos de denuncias recibidos:', denunciasResponse); // Para depuración
+        
         if (denunciasResponse.success && Array.isArray(denunciasResponse.data)) {
-          setDenuncias(denunciasResponse.data);
+          // Aseguramos que las fechas sean válidas antes de guardarlas
+          const denunciasConFechasValidas = denunciasResponse.data.map(denuncia => ({
+            ...denuncia,
+            fechaValida: denuncia.fechaHora || denuncia.fecha || denuncia.createdAt
+          }));
+          setDenuncias(denunciasConFechasValidas);
         } else {
           setDenuncias([]);
         }
@@ -56,6 +60,27 @@ function ProfilePage() {
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  // Función para formatear fecha de manera segura
+  const formatDate = (isoString) => {
+    if (!isoString) return 'Fecha no disponible';
+    
+    try {
+      const date = new Date(isoString);
+      if (isNaN(date.getTime())) return 'Fecha inválida';
+      
+      return date.toLocaleString('es-PE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).replace(',', '');
+    } catch {
+      return 'Fecha inválida';
+    }
   };
 
   if (!isAuthenticated) {
@@ -192,7 +217,7 @@ function ProfilePage() {
                         <div className="flex justify-between items-start">
                           <p className="text-gray-800">{publicacion.contenido}</p>
                           <span className="text-sm text-gray-500">
-                            {new Date(publicacion.fecha_creacion).toLocaleDateString('es-PE')}
+                            {formatDate(publicacion.fecha_creacion)}
                           </span>
                         </div>
                         {publicacion.anonimo && (
@@ -241,10 +266,12 @@ function ProfilePage() {
                         {denuncias.map((denuncia) => (
                           <tr key={denuncia.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {denuncia.categoria || 'Sin categoría'}
+                              {denuncia.categoria 
+                                ? denuncia.categoria.charAt(0).toUpperCase() + denuncia.categoria.slice(1).toLowerCase()
+                                : 'Sin categoría'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {new Date(denuncia.fechaHora || denuncia.fecha).toLocaleDateString('es-PE')}
+                              {formatDate(denuncia.fecha_hecho)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
